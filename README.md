@@ -33,8 +33,8 @@
 - ctrlキー+Jでターミナルを起動
 - 以下のコマンドをターミナルで実行
 
+```bash
 1. `py -3 -m venv .venv`
 2. `.venv\Scripts\activate`
 3. `pip install -r requirements.txt`
-
-CTRL\end
+```
