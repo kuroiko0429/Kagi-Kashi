@@ -23,17 +23,9 @@
 - その部活に学籍番号が登録されている。
 - 学籍番号、名前、鍵番号を入力後借りれる。
 
-<<<<<<< HEAD
-以下環境構築コマンド
-・ py -3 -m venv .venv
-・ .venv\Scripts\activate
-・ pip install -r requirements.txt
-=======
 ## 鍵を返す場合
 - ログイン後の詳細ページで返却を選択し色が変われば返却済みになる。
-<<<<<<< HEAD
->>>>>>> 66eeb3a (add memo)
-=======
+
 
 
 ## 環境構築方法
@@ -42,4 +34,4 @@
 1. `py -3 -m venv .venv`
 2. `.venv\Scripts\activate`
 3. `pip install -r requirements.txt`
->>>>>>> 6e5ba97 (最小構成のwebアプリケーション)
+
