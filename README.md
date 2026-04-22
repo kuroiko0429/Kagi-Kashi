@@ -28,9 +28,9 @@
 - ログイン後の詳細ページで返却を選択し色が変われば返却済みになる。
 
 
-## 以下環境構築方法
-ctrlキー+Jでターミナルを起動
-以下のコマンドをターミナルで実行
+## 環境構築方法
+- ctrlキー+Jでターミナルを起動
+- 以下のコマンドをターミナルで実行
 1. `py -3 -m venv .venv`
 2. `.venv\Scripts\activate`
 3. `pip install -r requirements.txt`
