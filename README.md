@@ -38,3 +38,8 @@
 2. .venv\Scripts\activate
 3. pip install -r requirements.txt
 ```
+
+## 起動方法
+- ディレクトリ直下にあるapp.pyを起動
+
+
