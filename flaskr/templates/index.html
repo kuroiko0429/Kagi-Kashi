@@ -6,7 +6,34 @@
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <title>Document</title>
 </head>
-<body>
-  <h1 class="font-bold">index.html表示してます</h1>
+<body class="bg-gray-200">
+  <h1 class="font-bold text-xl">index.html表示してます</h1>
+  <div class="w-4/5 py-20 border rounded bg-white">
+    <table class="w-full border">
+      <tr class="h-8 border bg-gray-200">
+        <th class="text-left w-1/5">鍵番号</th>
+        <th class="text-left w-2/5">部屋名</th>
+        <th class="text-left w-1/5">状態</th>
+        <th class="text-left w-1/5">コメント</th>
+      </tr>
+      {% for key in keys%}
+        <tr class="h-10 border">
+          <td class="">{{ key.id }}</td>
+          <td class="">{{ key.name }}</td>
+          {% if key.state == 1%}
+            <td class="">
+              <div class="flex justify-center items-center w-20 h-8 rounded-2xl bg-green-200">貸出中</div>
+            </td>
+          {% else %}
+            <td class="">
+              <div class="flex justify-center items-center w-20 h-8 rounded-2xl bg-gray-200">保管中</div>
+            </td>
+          {% endif %}
+          <td class="">{{ key.comment }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  </div>
+  
 </body>
 </html>

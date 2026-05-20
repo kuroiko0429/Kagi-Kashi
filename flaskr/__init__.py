@@ -25,6 +25,10 @@ def create_app(test_config=None):
     # ページの表示
     @app.route('/')
     def hello():
-        return render_template('index.html')
+        keys = [
+            {'id':24, 'name':"ボードゲーム", 'state':0, 'comment':""},
+            {'id':24, 'name':"ボードゲーム", 'state':1, 'comment':""}
+        ]
+        return render_template('index.html', keys=keys)
 
     return app
