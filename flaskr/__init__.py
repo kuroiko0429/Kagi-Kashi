@@ -27,6 +27,17 @@ def create_app(test_config=None):
     def hello():
         keys = [
             {'id':24, 'name':"ボードゲーム", 'state':0, 'comment':""},
+            {'id':24, 'name':"ボードゲーム", 'state':1, 'comment':""},
+            {'id':24, 'name':"ボードゲーム", 'state':0, 'comment':""},
+            {'id':24, 'name':"ボードゲーム", 'state':1, 'comment':""},
+            {'id':24, 'name':"ボードゲーム", 'state':1, 'comment':""},
+            {'id':24, 'name':"ボードゲーム", 'state':0, 'comment':""},
+            {'id':24, 'name':"ボードゲーム", 'state':1, 'comment':""},
+            {'id':24, 'name':"ボードゲーム", 'state':0, 'comment':""},
+            {'id':24, 'name':"ボードゲーム", 'state':1, 'comment':""},
+            {'id':24, 'name':"ボードゲーム", 'state':1, 'comment':""},
+            {'id':24, 'name':"ボードゲーム", 'state':0, 'comment':""},
+            {'id':24, 'name':"ボードゲーム", 'state':0, 'comment':""},
             {'id':24, 'name':"ボードゲーム", 'state':1, 'comment':""}
         ]
         return render_template('index.html', keys=keys)
