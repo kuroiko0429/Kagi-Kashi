@@ -12,7 +12,11 @@
   </header>
 
   <main class="w-full h-full px-30 py-10 pt-26 bg-gray-200">
-    <input type="text" class="border" />
+    <h1>学生証を読み取ってください</h1>
+    <form action="/id-post" method="POST">
+        <input name="data1" class="border rounded" autofocus></input>
+        <button type="submit" class="border rounded">送信</button>
+    </form>
   </main>
   <small class="absolute bottom-2 left-2">&copy; 2026 Hokkaido Information University</small>
 </body>
