@@ -41,5 +41,9 @@ def create_app(test_config=None):
             {'id':24, 'name':"ボードゲーム", 'state':1, 'comment':""}
         ]
         return render_template('index.html', keys=keys)
+    
+    @app.route('/input')
+    def input():
+        return render_template('input.html')
 
     return app
