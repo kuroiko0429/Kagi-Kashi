@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 
 
 def create_app(test_config=None):
@@ -41,5 +41,18 @@ def create_app(test_config=None):
             {'id':24, 'name':"ボードゲーム", 'state':1, 'comment':""}
         ]
         return render_template('index.html', keys=keys)
+    
+    @app.route('/input')
+    def input():
+        return render_template('input.html')
+    
+    @app.route('/id-post', methods=['POST'])
+    def sample_form_temp():
+        print('POSTデータ受け取ったので処理します')
+        id = request.form['data1']
+        if id[0]=="a" and id[-1]=="a":
+            return f"学籍番号: {id[1:-1]}"
+        else:
+            return "不正な学籍番号です"
 
     return app
