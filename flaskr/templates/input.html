@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,11 +12,13 @@
   </header>
 
   <main class="w-full h-full px-30 py-10 pt-26 bg-gray-200">
-    <h1>学生証を読み取ってください</h1>
-    <form action="/id-post" method="POST">
-        <input name="data1" class="border rounded" autofocus></input>
-        <button type="submit" class="border rounded">送信</button>
-    </form>
+    <div class="flex flex-col w-full h-full bg-white border border-gray-300 rounded-xl shadow-sm overflow-hidden">
+      <form action="/id-post" method="POST" class="flex flex-col gap-4 py-10">
+          <label for="student_id" class="ml-10 text-xl">学生証を読み取ってください</label>
+          <input name="student_id" placeholder="学籍番号を入力して下さい" autofocus required class="border border-gray-300 rounded-lg bg-gray-50 focus-within:ring-2 focus-within:ring-green-500 focus-within:border-transparent transition h-12 mx-10 px-4 text-gray-600 outline-none" ></input>
+          <button type="submit" class="flex justify-center items-center w-28 h-10 ml-auto mr-10 rounded-lg bg-green-500 hover:bg-green-600 text-white font-medium shadow-sm transition-colors cursor-pointer">送信</button>
+      </form>
+    </div>
   </main>
   <small class="absolute bottom-2 left-2">&copy; 2026 Hokkaido Information University</small>
 </body>

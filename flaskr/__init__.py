@@ -49,9 +49,11 @@ def create_app(test_config=None):
     @app.route('/id-post', methods=['POST'])
     def sample_form_temp():
         print('POSTデータ受け取ったので処理します')
-        id = request.form['data1']
-        if id[0]=="a" and id[-1]=="a":
-            return f"学籍番号: {id[1:-1]}"
+        id = request.form['student_id'].strip()
+        if id[0] == "s":
+            id.pop(0)
+        if len(id) == 7:
+            return f"学籍番号: {id}"
         else:
             return "不正な学籍番号です"
 
