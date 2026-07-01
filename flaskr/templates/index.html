@@ -27,7 +27,7 @@
       </div>
       
       <div class="flex-1 w-full overflow-y-auto border-t border-b border-gray-200 relative">
-        <table class="w-full text-left border-collapse">
+        <table id="clab_table" class="w-full text-left border-collapse">
           <thead>
             <tr class="sticky top-0 z-10 h-10 bg-gray-100 border-b border-gray-300 text-gray-600 font-semibold text-sm">
               <th class="w-1/5 px-4">鍵番号</th>
@@ -38,7 +38,7 @@
           </thead>
           <tbody class="divide-y divide-gray-100">
             {% for key in keys %}
-              <tr class="key-row h-12 hover:bg-gray-50 transition-colors text-sm" data-room-name="{{ key.name }}">
+              <tr class="key-row h-12 hover:bg-gray-50 transition-colors text-sm" data-name="{{ key.name }}" data-id="{{ key.id }}">
                 <td class="px-4 font-mono">{{ key.id }}</td>
                 <td class="px-4 font-medium">{{ key.name }}</td>
                 <td class="px-4">
@@ -60,7 +60,7 @@
       </div>
       
       <div class="flex justify-end items-center w-full p-4 shrink-0">
-        <a href="/input" class="flex justify-center items-center w-28 h-10 rounded-lg bg-green-500 hover:bg-green-600 text-white font-medium shadow-sm transition-colors cursor-pointer">
+        <a id="borrow_button" class="flex justify-center items-center w-28 h-10 rounded-lg bg-green-500 hover:bg-green-600 text-white font-medium shadow-sm transition-colors cursor-pointer">
           借りる
         </a>
       </div>
@@ -69,10 +69,18 @@
   </main>
   
   <footer class="w-full text-center py-2 text-xs text-gray-500 shrink-0 bg-gray-200">
-    &copy; 2026 Hokkaido Information University
+    &copy; 2026
   </footer>
 
+  <style>
+    .selected {
+        background-color: #FFFFE0;
+    }
+  </style>
+
   <script>
+    let selected_id, selected_name;
+
     document.getElementById('search-input').addEventListener('input', function(e) {
       // 入力された文字列を小文字に統一（英字の部屋名対策）
       const keyword = e.target.value.toLowerCase();
@@ -81,7 +89,7 @@
 
       rows.forEach(row => {
         // 各行のデータ属性から部屋名を取得
-        const roomName = row.getAttribute('data-room-name').toLowerCase();
+        const roomName = row.getAttribute('data-name').toLowerCase();
         
         // キーワードが含まれているか判定
         if (roomName.includes(keyword)) {
@@ -90,6 +98,39 @@
           row.classList.add('hidden');    // 一致しなければ非表示
         }
       });
+    });
+
+    document.querySelectorAll("#clab_table tr").forEach(row => {
+      row.addEventListener("click", function() {
+        // 既存の選択状態をリセット
+        document.querySelectorAll("#clab_table tr").forEach(e => {
+          e.classList.remove("selected");
+        });
+        // クリックされた要素を選択状態にする
+        this.classList.add('selected');
+        // data-id取得
+        selected_id = this.dataset.id;
+        selected_name = this.dataset.name;
+      });
+    });
+
+    document.querySelector("#borrow_button").addEventListener("click", function() {
+      if (selected_id && selected_name) {
+        // Flaskへ送信
+        fetch("/select_row", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            key_id:    selected_id,
+            clab_name: selected_name
+          })
+        });
+        window.location.href = "/input"
+      } else {
+        alert("借りる鍵を選択してください。")
+      }
     });
   </script>
 
