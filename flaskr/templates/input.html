@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <title>鍵貸出システム</title>
+</head>
+<body class="w-screen h-dvh flex flex-col bg-gray-100 text-gray-800 antialiased">
+
+  <header class="flex fixed top-0 w-full bg-white items-center h-16 shadow-sm border-b border-gray-200 z-50">
+    <h1 class="ml-6 font-bold text-2xl tracking-wider text-green-700">鍵貸出システム</h1>
+  </header>
+
+  <main class="flex-1 flex justify-center items-center px-4 pt-16 pb-12">
+    <div class="w-full max-w-xl bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden p-8 md:p-12 transition-all">
+      
+      <form action="/id-post" method="POST" class="flex flex-col gap-6">
+        <div class="text-center space-y-2">
+          <label for="student_id" class="text-2xl font-bold block text-gray-700">
+            学生証を読み取ってください
+          </label>
+          <p class="text-sm text-gray-400">バーコードリーダーにかざすか、学籍番号を入力してください。(sは不要です)</p>
+        </div>
+
+        <input 
+          id="student_id"
+          name="student_id" 
+          placeholder="学籍番号を入力して下さい" 
+          autofocus 
+          required 
+          class="w-full border-2 border-gray-300 rounded-xl bg-gray-50 focus:ring-4 focus:ring-green-500/20 focus:border-green-500 transition-all h-14 px-5 text-xl tracking-widest text-center text-gray-700 outline-none"
+        ></input>
+
+        <button 
+          type="submit" 
+          class="w-full h-12 rounded-xl bg-green-600 hover:bg-green-500 text-white font-bold text-lg shadow-md hover:shadow-lg active:scale-[0.98] transition-all cursor-pointer"
+        >
+          送信する
+        </button>
+      </form>
+
+    </div>
+  </main>
+
+  <footer class="w-full text-center py-3 bg-gray-50 border-t border-gray-200 text-xs text-gray-500">
+    &copy; 2026
+  </footer>
+
+</body>
+</html>

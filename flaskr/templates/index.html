@@ -1,12 +1,138 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  <title>Document</title>
+  <title>鍵貸出システム</title>
 </head>
-<body>
-  <h1 class="font-bold">index.html表示してます</h1>
+<body class="flex flex-col w-screen h-screen bg-gray-200 text-gray-800">
+
+  <header class="flex sticky top-0 z-50 items-center w-full h-16 bg-white shadow-sm shrink-0">
+    <h1 class="ml-6 text-2xl font-bold">鍵貸出システム</h1>
+  </header>
+
+  <main class="flex-1 w-full max-w-7xl mx-auto px-6 py-8 md:px-12 lg:px-24 overflow-hidden">
+    <div class="flex flex-col w-full h-full bg-white border border-gray-300 rounded-xl shadow-sm overflow-hidden">
+      
+      <div class="w-full p-4 shrink-0">
+        <div class="flex items-center w-full h-12 border border-gray-300 rounded-lg bg-gray-50 focus-within:ring-2 focus-within:ring-green-500 focus-within:border-transparent transition">
+          <div class="flex justify-center items-center w-8 h-8 ml-3 text-gray-400">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.604 10.604Z" />
+            </svg>
+          </div>
+          <input type="text" id="search-input" placeholder="部屋名で検索" class="w-full h-full ml-2 text-gray-600 bg-transparent outline-none pr-4" />
+        </div>
+      </div>
+      
+      <div class="flex-1 w-full overflow-y-auto border-t border-b border-gray-200 relative">
+        <table id="clab_table" class="w-full text-left border-collapse">
+          <thead>
+            <tr class="sticky top-0 z-10 h-10 bg-gray-100 border-b border-gray-300 text-gray-600 font-semibold text-sm">
+              <th class="w-1/5 px-4">鍵番号</th>
+              <th class="w-2/5 px-4">部屋名</th>
+              <th class="w-1/5 px-4">状態</th>
+              <th class="w-1/5 px-4">コメント</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            {% for key in keys %}
+              <tr class="key-row h-12 hover:bg-gray-50 transition-colors text-sm" data-name="{{ key.name }}" data-id="{{ key.id }}">
+                <td class="px-4 font-mono">{{ key.id }}</td>
+                <td class="px-4 font-medium">{{ key.name }}</td>
+                <td class="px-4">
+                  {% if key.state == 1 %}
+                    <span class="inline-flex justify-center items-center w-20 h-7 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
+                      貸出中
+                    </span>
+                  {% else %}
+                    <span class="inline-flex justify-center items-center w-20 h-7 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
+                      保管中
+                    </span>
+                  {% endif %}
+                </td>
+                <td class="px-4 text-gray-500">{{ key.comment }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="flex justify-end items-center w-full p-4 shrink-0">
+        <a id="borrow_button" class="flex justify-center items-center w-28 h-10 rounded-lg bg-green-500 hover:bg-green-600 text-white font-medium shadow-sm transition-colors cursor-pointer">
+          借りる
+        </a>
+      </div>
+
+    </div>
+  </main>
+  
+  <footer class="w-full text-center py-2 text-xs text-gray-500 shrink-0 bg-gray-200">
+    &copy; 2026
+  </footer>
+
+  <style>
+    .selected {
+        background-color: #FFFFE0;
+    }
+  </style>
+
+  <script>
+    let selected_id, selected_name;
+
+    document.getElementById('search-input').addEventListener('input', function(e) {
+      // 入力された文字列を小文字に統一（英字の部屋名対策）
+      const keyword = e.target.value.toLowerCase();
+      // テーブルの全データ行を取得
+      const rows = document.querySelectorAll('.key-row');
+
+      rows.forEach(row => {
+        // 各行のデータ属性から部屋名を取得
+        const roomName = row.getAttribute('data-name').toLowerCase();
+        
+        // キーワードが含まれているか判定
+        if (roomName.includes(keyword)) {
+          row.classList.remove('hidden'); // 一致したら表示
+        } else {
+          row.classList.add('hidden');    // 一致しなければ非表示
+        }
+      });
+    });
+
+    document.querySelectorAll("#clab_table tr").forEach(row => {
+      row.addEventListener("click", function() {
+        // 既存の選択状態をリセット
+        document.querySelectorAll("#clab_table tr").forEach(e => {
+          e.classList.remove("selected");
+        });
+        // クリックされた要素を選択状態にする
+        this.classList.add('selected');
+        // data-id取得
+        selected_id = this.dataset.id;
+        selected_name = this.dataset.name;
+      });
+    });
+
+    document.querySelector("#borrow_button").addEventListener("click", function() {
+      if (selected_id && selected_name) {
+        // Flaskへ送信
+        fetch("/select_row", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            key_id:    selected_id,
+            clab_name: selected_name
+          })
+        });
+        window.location.href = "/input"
+      } else {
+        alert("借りる鍵を選択してください。")
+      }
+    });
+  </script>
+
 </body>
 </html>
