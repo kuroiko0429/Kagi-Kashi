@@ -15,8 +15,8 @@
   <main class="flex-1 w-full max-w-7xl mx-auto px-6 py-8 md:px-12 lg:px-24 overflow-hidden">
     <div class="flex flex-col w-full h-full bg-white border border-gray-300 rounded-xl shadow-sm overflow-hidden">
       
-      <div class="w-full p-4 shrink-0">
-        <div class="flex items-center w-full h-12 border border-gray-300 rounded-lg bg-gray-50 focus-within:ring-2 focus-within:ring-green-500 focus-within:border-transparent transition">
+      <div class="w-full p-4 shrink-0 flex flex-col sm:flex-row gap-4 items-center justify-between border-b border-gray-200">
+        <div class="flex items-center w-full sm:w-1/3 h-12 border border-gray-300 rounded-lg bg-gray-50 focus-within:ring-2 focus-within:ring-green-500 focus-within:border-transparent transition">
           <div class="flex justify-center items-center w-8 h-8 ml-3 text-gray-400">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
               <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.604 10.604Z" />
@@ -24,9 +24,16 @@
           </div>
           <input type="text" id="search-input" placeholder="部屋名で検索" class="w-full h-full ml-2 text-gray-600 bg-transparent outline-none pr-4" />
         </div>
+
+        <div class="flex bg-gray-100 p-1 rounded-lg border border-gray-200 w-full sm:w-auto">
+          <button data-filter="all" class="filter-btn flex-1 sm:flex-initial px-4 py-2 text-sm font-medium rounded-md bg-white text-gray-800 shadow-sm transition">すべて</button>
+          <button data-filter="available" class="filter-btn flex-1 sm:flex-initial px-4 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-gray-800 transition">保管中</button>
+          <button data-filter="borrowed" class="filter-btn flex-1 sm:flex-initial px-4 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-gray-800 transition">貸出中</button>
+          <button data-filter="locked" class="filter-btn flex-1 sm:flex-initial px-4 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-gray-800 transition">一時施錠中</button>
+        </div>
       </div>
       
-      <div class="flex-1 w-full overflow-y-auto border-t border-b border-gray-200 relative">
+      <div class="flex-1 w-full overflow-y-auto relative">
         <table id="clab_table" class="w-full text-left border-collapse">
           <thead>
             <tr class="sticky top-0 z-10 h-10 bg-gray-100 border-b border-gray-300 text-gray-600 font-semibold text-sm">
@@ -38,16 +45,23 @@
           </thead>
           <tbody class="divide-y divide-gray-100">
             {% for key in keys %}
-              <tr class="key-row h-12 hover:bg-gray-50 transition-colors text-sm" data-name="{{ key.name }}" data-id="{{ key.id }}">
+              <tr class="key-row h-12 hover:bg-gray-50 transition-colors text-sm" 
+                  data-name="{{ key.name }}" 
+                  data-id="{{ key.id }}"
+                  data-state="{% if key.state == 1 %}borrowed{% elif key.state == 2 %}locked{% else %}available{% endif %}">
                 <td class="px-4 font-mono">{{ key.id }}</td>
                 <td class="px-4 font-medium">{{ key.name }}</td>
                 <td class="px-4">
                   {% if key.state == 1 %}
-                    <span class="inline-flex justify-center items-center w-20 h-7 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
+                    <span class="inline-flex justify-center items-center w-24 h-7 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
                       貸出中
                     </span>
+                  {% elif key.state == 2 %}
+                    <span class="inline-flex justify-center items-center w-24 h-7 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 border border-yellow-200">
+                      一時施錠中
+                    </span>
                   {% else %}
-                    <span class="inline-flex justify-center items-center w-20 h-7 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
+                    <span class="inline-flex justify-center items-center w-24 h-7 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
                       保管中
                     </span>
                   {% endif %}
@@ -59,7 +73,7 @@
         </table>
       </div>
       
-      <div class="flex justify-end items-center w-full p-4 shrink-0">
+      <div class="flex justify-end items-center w-full p-4 shrink-0 border-t border-gray-200">
         <a id="borrow_button" class="flex justify-center items-center w-28 h-10 rounded-lg bg-green-500 hover:bg-green-600 text-white font-medium shadow-sm transition-colors cursor-pointer">
           借りる
         </a>
@@ -80,43 +94,70 @@
 
   <script>
     let selected_id, selected_name;
+    let currentFilter = 'all';
 
-    document.getElementById('search-input').addEventListener('input', function(e) {
-      // 入力された文字列を小文字に統一（英字の部屋名対策）
-      const keyword = e.target.value.toLowerCase();
-      // テーブルの全データ行を取得
+    // 検索とフィルターの状態を同時に反映する関数
+    function updateVisibleRows() {
+      const keyword = document.getElementById('search-input').value.toLowerCase();
       const rows = document.querySelectorAll('.key-row');
 
       rows.forEach(row => {
-        // 各行のデータ属性から部屋名を取得
         const roomName = row.getAttribute('data-name').toLowerCase();
-        
-        // キーワードが含まれているか判定
-        if (roomName.includes(keyword)) {
-          row.classList.remove('hidden'); // 一致したら表示
+        const rowState = row.getAttribute('data-state');
+
+        // 「検索キーワードに一致」かつ「選択中のフィルターに一致」するか判定
+        const matchesSearch = roomName.includes(keyword);
+        const matchesFilter = (currentFilter === 'all' || rowState === currentFilter);
+
+        if (matchesSearch && matchesFilter) {
+          row.classList.remove('hidden');
         } else {
-          row.classList.add('hidden');    // 一致しなければ非表示
+          row.classList.add('hidden');
+          // 非表示になった行が選択されていた場合は選択を解除（トラブル防止）
+          if (row.classList.contains('selected')) {
+            row.classList.remove('selected');
+            selected_id = null;
+            selected_name = null;
+          }
         }
+      });
+    }
+
+    // 検索入力時のイベント
+    document.getElementById('search-input').addEventListener('input', updateVisibleRows);
+
+    // フィルターボタンのイベント
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        // ボタンの見た目の切り替え
+        document.querySelectorAll('.filter-btn').forEach(b => {
+          b.classList.remove('bg-white', 'text-gray-800', 'shadow-sm');
+          b.classList.add('text-gray-600', 'hover:text-gray-800');
+        });
+        this.classList.remove('text-gray-600', 'hover:text-gray-800');
+        this.classList.add('bg-white', 'text-gray-800', 'shadow-sm');
+
+        // フィルター状態を更新して行を再描画
+        currentFilter = this.getAttribute('data-filter');
+        updateVisibleRows();
       });
     });
 
-    document.querySelectorAll("#clab_table tr").forEach(row => {
+    // 行選択のイベント（thead内のtrを除外するため明示的にtbodyを指定）
+    document.querySelectorAll("#clab_table tbody tr").forEach(row => {
       row.addEventListener("click", function() {
-        // 既存の選択状態をリセット
         document.querySelectorAll("#clab_table tr").forEach(e => {
           e.classList.remove("selected");
         });
-        // クリックされた要素を選択状態にする
         this.classList.add('selected');
-        // data-id取得
         selected_id = this.dataset.id;
         selected_name = this.dataset.name;
       });
     });
 
+    // 借りるボタンのイベント
     document.querySelector("#borrow_button").addEventListener("click", function() {
       if (selected_id && selected_name) {
-        // Flaskへ送信
         fetch("/select_row", {
           method: "POST",
           headers: {
@@ -127,9 +168,9 @@
             clab_name: selected_name
           })
         });
-        window.location.href = "/input"
+        window.location.href = "/input";
       } else {
-        alert("借りる鍵を選択してください。")
+        alert("借りる鍵を選択してください。");
       }
     });
   </script>
