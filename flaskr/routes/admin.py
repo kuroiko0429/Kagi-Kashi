@@ -1,7 +1,11 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, render_template
 from ..db import get_db
 
 admin_bp = Blueprint("admin", __name__)
+
+@admin_bp.route("/admin")
+def admin_page():
+    return render_template("admin/admin.html")
 
 # 鍵一覧（全鍵＋サークル情報）
 @admin_bp.route("/api/admin/keys", methods=["GET"])
