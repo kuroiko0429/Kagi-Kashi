@@ -1,5 +1,6 @@
 import os
 from flask import Flask, render_template, request, session
+import flaskr.db as db
 import datetime
 import random
 from .routes.admin import admin_bp
@@ -50,8 +51,18 @@ def create_app(test_config=None):
     # ページの表示
     # メインページ
     @app.route('/')
-    def hello():
-        return render_template('index.html', keys=KEYS)
+    def main():
+        cur = db.get_db().cursor()
+        cur.execute('SELECT * FROM clubs')
+        keys = []
+        for row in cur.fetchall():
+            keys.append({
+                "id": row["id"],
+                "name": row["name"],
+                "state": row["status"]!='locked',
+                "comment": row["message"]
+            })
+        return render_template('index.html', keys=keys)
     # 行選択時
     @app.route("/select_row", methods=["POST"])
     def select_row():
