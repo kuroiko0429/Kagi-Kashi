@@ -7,6 +7,26 @@ admin_bp = Blueprint("admin", __name__)
 def admin_page():
     return render_template("admin/admin.html")
 
+@admin_bp.route("/admin/clubs")
+def admin_clubs():
+    return render_template("admin/clubs.html")
+
+@admin_bp.route("/admin/members")
+def admin_members():
+    return render_template("admin/members.html")
+
+@admin_bp.route("/admin/keys")
+def admin_keys():
+    return render_template("admin/keys.html")
+
+@admin_bp.route("/admin/borrow")
+def admin_borrow():
+    return render_template("admin/borrow.html")
+
+@admin_bp.route("/admin/reports")
+def admin_reports():
+    return render_template("admin/reports.html")
+
 # 鍵一覧（全鍵＋サークル情報）
 @admin_bp.route("/api/admin/keys", methods=["GET"])
 def get_keys():
