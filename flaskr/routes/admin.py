@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from db import get_db
+from ..db import get_db
 
 admin_bp = Blueprint("admin", __name__)
 
@@ -106,7 +106,7 @@ def update_leader(club_id):
     db.commit()
     return jsonify({"message": "leader updated"})
 
-# 貸出履歴一覧（重要）
+# 貸出履歴一覧
 @admin_bp.route("/api/admin/borrow-records", methods=["GET"])
 def get_borrow_records():
     db = get_db()
@@ -127,17 +127,121 @@ def get_borrow_records():
 
     return jsonify([dict(r) for r in rows])
 
-# 返却処理
-@admin_bp.route("/api/admin/borrow-records/<int:record_id>/return", methods=["PATCH"])
-def return_key(record_id):
+# サークル情報更新
+@admin_bp.route("/api/admin/clubs/<int:club_id>", methods=["PATCH"])
+def update_club(club_id):
     db = get_db()
+    data = request.get_json()
 
-    # 返却時間を入れる
     db.execute("""
-        UPDATE borrow_records
-        SET returned_at = CURRENT_TIMESTAMP
+        UPDATE clubs
+        SET
+            name = ?,
+            room_number = ?,
+            status = ?,
+            message = ?,
+            icon_color = ?,
+            category = ?
         WHERE id = ?
-    """, (record_id,))
+    """, (
+        data["name"],
+        data["room_number"],
+        data["status"],
+        data["message"],
+        data["icon_color"],
+        data["category"],
+        club_id
+    ))
 
     db.commit()
-    return jsonify({"message": "returned"}) 
+
+    return jsonify({"message": "club updated"})
+
+# サークル削除
+@admin_bp.route("/api/admin/clubs/<int:club_id>", methods=["DELETE"])
+def delete_club(club_id):
+    db = get_db()
+
+    db.execute("""
+        DELETE FROM clubs
+        WHERE id = ?
+    """, (club_id,))
+
+    db.commit()
+
+    return jsonify({"message": "club deleted"})
+
+# メンバー一覧
+@admin_bp.route("/api/admin/members", methods=["GET"])
+def get_members():
+    db = get_db()
+
+    rows = db.execute("""
+        SELECT
+            members.id,
+            members.student_id,
+            members.name,
+            members.registered_at,
+            clubs.name AS club_name
+        FROM members
+        JOIN clubs
+        ON members.club_id = clubs.id
+        ORDER BY members.id
+    """).fetchall()
+
+    return jsonify([dict(r) for r in rows])
+
+# メンバー追加
+@admin_bp.route("/api/admin/members", methods=["POST"])
+def add_member():
+    db = get_db()
+    data = request.get_json()
+
+    db.execute("""
+        INSERT INTO members
+        (student_id, name, club_id)
+        VALUES (?, ?, ?)
+    """, (
+        data["student_id"],
+        data["name"],
+        data["club_id"]
+    ))
+
+    db.commit()
+
+    return jsonify({"message": "member added"})
+
+# メンバー削除
+@admin_bp.route("/api/admin/members/<int:member_id>", methods=["DELETE"])
+def delete_member(member_id):
+    db = get_db()
+
+    db.execute("""
+        DELETE FROM members
+        WHERE id = ?
+    """, (member_id,))
+
+    db.commit()
+
+    return jsonify({"message": "member deleted"})
+
+# 活動報告一覧
+@admin_bp.route("/api/admin/activity-reports", methods=["GET"])
+def get_reports():
+    db = get_db()
+
+    rows = db.execute("""
+        SELECT
+            activity_reports.id,
+            activity_reports.reporter_name,
+            activity_reports.student_id,
+            activity_reports.report_date,
+            activity_reports.description,
+            clubs.name AS club_name
+        FROM activity_reports
+        JOIN clubs
+        ON activity_reports.club_id = clubs.id
+        ORDER BY activity_reports.report_date DESC
+    """).fetchall()
+
+    return jsonify([dict(r) for r in rows])

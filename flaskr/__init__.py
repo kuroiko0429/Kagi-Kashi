@@ -2,6 +2,8 @@ import os
 from flask import Flask, render_template, request, session
 import datetime
 import random
+from .routes.admin import admin_bp
+from . import db
 
 KEYS = [
     {'id':24, 'name':"ボードゲーム", 'state':0, 'comment':""},
@@ -40,6 +42,10 @@ def create_app(test_config=None):
 
     # インスタンスフォルダの生成
     os.makedirs(app.instance_path, exist_ok=True)
+
+    db.init_app(app)    #DBの初期化
+
+    app.register_blueprint(admin_bp)    #Blueprint登録
 
     # ページの表示
     # メインページ
