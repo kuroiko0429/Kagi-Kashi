@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>鍵管理</title>
+</head>
+
+<body>
+
+<h1>鍵管理</h1>
+
+<a href="/admin">← 管理者メニューへ戻る</a>
+
+<hr>
+
+<h2>鍵追加</h2>
+
+<select id="club_id">
+{% for club in clubs %}
+<option value="{{ club.id }}">
+{{ club.name }}
+</option>
+{% endfor %}
+</select>
+
+<input id="key_number" placeholder="鍵番号">
+
+<button onclick="addKey()">追加</button>
+
+<hr>
+
+<h2>鍵一覧</h2>
+
+<table border="1">
+
+<tr>
+<th>ID</th>
+<th>鍵番号</th>
+<th>サークル</th>
+<th>状態</th>
+<th>操作</th>
+</tr>
+
+{% for key in keys %}
+
+<tr>
+
+<td>
+{{ key.id }}
+</td>
+
+<td>
+{{ key.key_number }}
+</td>
+
+<td>
+{{ key.club_name }}
+</td>
+
+<td>
+
+{% if key.available == 1 %}
+利用可能
+{% else %}
+貸出中
+{% endif %}
+
+</td>
+
+<td>
+
+{% if key.available == 1 %}
+
+<button onclick="updateKey({{ key.id }},0)">
+貸出
+</button>
+
+{% else %}
+
+<button onclick="updateKey({{ key.id }},1)">
+返却
+</button>
+
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+
+<script>
+
+async function addKey(){
+
+    const data={
+        club_id:
+        document.getElementById("club_id").value,
+
+        key_number:
+        document.getElementById("key_number").value
+    };
+
+
+    await fetch("/api/admin/keys",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify(data)
+    });
+
+
+    location.reload();
+
+}
+
+
+async function updateKey(id,status){
+
+    await fetch(`/api/admin/keys/${id}`,{
+        method:"PATCH",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+            available:status
+        })
+    });
+
+
+    location.reload();
+
+}
+
+</script>
+
+</body>
+</html>

@@ -86,7 +86,7 @@ def init_db():
         ("2023004", "田中 葵", 2, "datetime('now', '-10 days', 'localtime')"),
         # 写真部 (ID: 3)
         ("2023005", "渡辺 陸", 3, "datetime('now', '-40 days', 'localtime')"),
-        ("S2023006", "伊藤 結衣", 3, "datetime('now', '-12 days', 'localtime')"),
+        ("2023006", "伊藤 結衣", 3, "datetime('now', '-12 days', 'localtime')"),
         # 軽音楽部 (ID: 4)
         ("2023007", "中村 陽翔", 4, "datetime('now', '-50 days', 'localtime')"),
         ("2023008", "小林 凛", 4, "datetime('now', '-2 days', 'localtime')"),
