@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+<meta charset="UTF-8">
+<title>貸出履歴管理</title>
+</head>
+
+<body>
+
+<h1>貸出履歴管理</h1>
+
+<a href="/admin">
+← 管理者メニューへ戻る
+</a>
+
+<hr>
+
+<h2>貸出一覧</h2>
+
+<table border="1">
+
+<tr>
+<th>ID</th>
+<th>サークル</th>
+<th>学生ID</th>
+<th>名前</th>
+<th>鍵番号</th>
+<th>貸出日時</th>
+<th>返却日時</th>
+<th>操作</th>
+</tr>
+
+
+{% for record in records %}
+
+<tr>
+
+<td>
+{{ record.id }}
+</td>
+
+<td>
+{{ record.club_name }}
+</td>
+
+<td>
+{{ record.student_id }}
+</td>
+
+<td>
+{{ record.student_name }}
+</td>
+
+<td>
+{{ record.key_number }}
+</td>
+
+<td>
+{{ record.borrowed_at }}
+</td>
+
+<td>
+
+{% if record.returned_at %}
+{{ record.returned_at }}
+
+{% else %}
+貸出中
+{% endif %}
+
+</td>
+
+
+<td>
+
+{% if record.returned_at == None %}
+
+<button onclick="returnKey({{ record.id }})">
+返却
+</button>
+
+{% else %}
+
+完了
+
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+<script>
+
+async function returnKey(id){
+
+    if(!confirm("返却処理を行いますか？")){
+        return;
+    }
+
+    await fetch(
+        `/api/admin/borrow/${id}`,
+        {
+            method:"PATCH",
+            headers:{
+                "Content-Type":"application/json"
+            }
+        }
+    );
+
+    location.reload();
+
+}
+
+</script>
+
+</body>
+
+</html>

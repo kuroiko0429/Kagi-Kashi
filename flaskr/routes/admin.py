@@ -90,7 +90,27 @@ def admin_keys():
 
 @admin_bp.route("/admin/borrow")
 def admin_borrow():
-    return render_template("admin/borrow.html")
+    db = get_db()
+
+    records = db.execute("""
+        SELECT
+            borrow_records.id,
+            borrow_records.student_id,
+            borrow_records.student_name,
+            borrow_records.key_number,
+            borrow_records.borrowed_at,
+            borrow_records.returned_at,
+            clubs.name AS club_name
+        FROM borrow_records
+        JOIN clubs
+        ON borrow_records.club_id = clubs.id
+        ORDER BY borrow_records.borrowed_at DESC
+    """).fetchall()
+
+    return render_template(
+        "admin/borrow.html",
+        records=records
+    )
 
 @admin_bp.route("/admin/reports")
 def admin_reports():

@@ -77,27 +77,28 @@ def init_db():
     # 2. サークルメンバー (Members)
     # 各サークルIDは1から5
     # 退部ロック検証用に登録日時をシード値として設定（佐藤太陽は60日前[解除可]、鈴木美咲は5日前[ロック中]）
+    # 各サークルの1人目を部長(president)、2人目を一般部員(member)としてシード
     members_data = [
         # ボードゲームサークル (ID: 1)
-        ("2023001", "佐藤 太陽", 1, "datetime('now', '-60 days', 'localtime')"),
-        ("2023002", "鈴木 美咲", 1, "datetime('now', '-5 days', 'localtime')"),
+        ("2023001", "佐藤 太陽", 1, "president", "datetime('now', '-60 days', 'localtime')"),
+        ("2023002", "鈴木 美咲", 1, "member", "datetime('now', '-5 days', 'localtime')"),
         # コンピュータ研究会 (ID: 2)
-        ("2023003", "高橋 蓮", 2, "datetime('now', '-45 days', 'localtime')"),
-        ("2023004", "田中 葵", 2, "datetime('now', '-10 days', 'localtime')"),
+        ("2023003", "高橋 蓮", 2, "president", "datetime('now', '-45 days', 'localtime')"),
+        ("2023004", "田中 葵", 2, "member", "datetime('now', '-10 days', 'localtime')"),
         # 写真部 (ID: 3)
-        ("2023005", "渡辺 陸", 3, "datetime('now', '-40 days', 'localtime')"),
-        ("2023006", "伊藤 結衣", 3, "datetime('now', '-12 days', 'localtime')"),
+        ("2023005", "渡辺 陸", 3, "president", "datetime('now', '-40 days', 'localtime')"),
+        ("2023006", "伊藤 結衣", 3, "member", "datetime('now', '-12 days', 'localtime')"),
         # 軽音楽部 (ID: 4)
-        ("2023007", "中村 陽翔", 4, "datetime('now', '-50 days', 'localtime')"),
-        ("2023008", "小林 凛", 4, "datetime('now', '-2 days', 'localtime')"),
+        ("2023007", "中村 陽翔", 4, "president", "datetime('now', '-50 days', 'localtime')"),
+        ("2023008", "小林 凛", 4, "member", "datetime('now', '-2 days', 'localtime')"),
         # アニメーション研究会 (ID: 5)
-        ("2023009", "加藤 颯太", 5, "datetime('now', '-35 days', 'localtime')"),
-        ("2023010", "吉田 杏", 5, "datetime('now', '-8 days', 'localtime')"),
+        ("2023009", "加藤 颯太", 5, "president", "datetime('now', '-35 days', 'localtime')"),
+        ("2023010", "吉田 杏", 5, "member", "datetime('now', '-8 days', 'localtime')"),
     ]
-    for student_id, name, club_id, reg_expr in members_data:
+    for student_id, name, club_id, role, reg_expr in members_data:
         db.execute(
-            f"INSERT INTO members (student_id, name, club_id, registered_at) VALUES (?, ?, ?, {reg_expr})",
-            (student_id, name, club_id)
+            f"INSERT INTO members (student_id, name, club_id, role, registered_at) VALUES (?, ?, ?, ?, {reg_expr})",
+            (student_id, name, club_id, role)
         )
 
     # 3. 貸出中のレコード設定 (コンピュータ研究会は現在活動中(active)なので貸出履歴を挿入)

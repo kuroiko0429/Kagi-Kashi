@@ -1,0 +1,82 @@
+{% extends 'mobile/layout.html' %}
+
+{% block title %}ログイン | Kagi-Kashi{% endblock %}
+
+{% block content %}
+<div class="flex-grow flex flex-col justify-between p-6 bg-white overflow-y-auto no-scrollbar">
+  
+  <!-- ヘッダー -->
+  <div class="flex items-center gap-3 pt-4">
+    <a href="{{ url_for('mobile.index') }}" class="p-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100 transition-all active:scale-95">
+      <i data-lucide="chevron-left" class="w-5 h-5"></i>
+    </a>
+    <h2 class="text-sm font-bold text-gray-800">ログイン</h2>
+  </div>
+
+  <!-- 中央フォーム -->
+  <div class="my-auto flex flex-col gap-6">
+    <!-- キーマーク -->
+    <div class="flex flex-col items-center text-center gap-2">
+      <div class="w-12 h-12 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center shadow-sm">
+        <i data-lucide="key-round" class="w-6 h-6 text-sky-500"></i>
+      </div>
+      <div>
+        <h1 class="text-xl font-bold tracking-tight text-gray-900 font-outfit">Kagi-Kashi</h1>
+        <p class="text-[10px] text-gray-400 mt-0.5">北海道情報大学 部室鍵管理システム</p>
+      </div>
+    </div>
+
+    <!-- フォーム -->
+    <form action="{{ url_for('mobile.login', next=request.args.get('next')) }}" method="POST" class="flex flex-col gap-3.5">
+      <!-- 学籍番号 -->
+      <div class="flex flex-col gap-0.5">
+        <label for="student_id" class="text-[10px] font-bold text-gray-400 ml-1">学籍番号</label>
+        <div class="relative flex items-center">
+          <i data-lucide="user" class="absolute left-3 w-4 h-4 text-gray-400"></i>
+          <input type="text" id="student_id" name="student_id" placeholder="S2023001" required
+                 class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-white border border-gray-300 text-xs text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-1 focus:ring-gray-400 transition-all uppercase" />
+        </div>
+      </div>
+
+      <!-- 氏名 -->
+      <div class="flex flex-col gap-0.5">
+        <label for="name" class="text-[10px] font-bold text-gray-400 ml-1">氏名</label>
+        <div class="relative flex items-center">
+          <i data-lucide="tag" class="absolute left-3 w-4 h-4 text-gray-400"></i>
+          <input type="text" id="name" name="name" placeholder="佐藤 太陽" required
+                 class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-white border border-gray-300 text-xs text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-1 focus:ring-gray-400 transition-all" />
+        </div>
+      </div>
+
+      <!-- ログインボタン -->
+      <button type="submit" 
+              class="w-full py-3 mt-2 rounded-xl bg-gray-800 hover:bg-gray-900 font-bold text-xs text-white shadow-sm active:scale-95 transition-all cursor-pointer">
+        ログインする
+      </button>
+
+      <div class="relative flex py-1 items-center">
+        <div class="flex-grow border-t border-gray-200"></div>
+        <span class="flex-shrink mx-3 text-gray-450 text-[10px] font-bold">または</span>
+        <div class="flex-grow border-t border-gray-200"></div>
+      </div>
+
+      <a href="{{ url_for('mobile.google_login', next=request.args.get('next')) }}" 
+         class="w-full py-2.5 border border-gray-300 rounded-xl hover:bg-gray-50 flex items-center justify-center gap-2 font-bold text-xs text-gray-750 active:scale-95 transition-all cursor-pointer">
+        <svg class="w-4 h-4" viewBox="0 0 24 24">
+          <path fill="#EA4335" d="M12 5.04c1.62 0 3.08.56 4.22 1.65l3.15-3.15C17.45 1.69 14.96 1 12 1 7.35 1 3.39 3.66 1.39 7.56l3.89 3.02C6.23 7.42 8.89 5.04 12 5.04z"/>
+          <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.51h6.44c-.28 1.46-1.1 2.69-2.34 3.52l3.63 2.81c2.13-1.97 3.76-4.88 3.76-8.48z"/>
+          <path fill="#FBBC05" d="M5.28 14.58c-.24-.72-.38-1.5-.38-2.3s.14-1.58.38-2.3L1.39 6.96C.5 8.78 0 10.82 0 13s.5 4.22 1.39 6.04l3.89-3.46z"/>
+          <path fill="#34A853" d="M12 23c3.24 0 5.97-1.07 7.96-2.91l-3.63-2.81c-1.1.74-2.51 1.18-4.33 1.18-3.11 0-5.77-2.38-6.72-5.54l-3.89 3.02C3.39 20.34 7.35 23 12 23z"/>
+        </svg>
+        Googleでログイン (@do-johodai.ac.jp)
+      </a>
+    </form>
+  </div>
+
+  <!-- フッター -->
+  <div class="text-center pt-4 border-t border-gray-50">
+    <p class="text-[9px] text-gray-400">&copy; Hokkaido Information University</p>
+  </div>
+
+</div>
+{% endblock %}
