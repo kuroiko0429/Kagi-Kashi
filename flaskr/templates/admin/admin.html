@@ -3,58 +3,57 @@
 
 <head>
     <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <title>管理者メニュー</title>
 </head>
 
+<body class="p-12">
+    <header class="flex justify-between items-center mb-8">
+        <h1 class="text-2xl font-bold text-gray-800">管理者メニュー</h1>
+        <a href="/admin/borrow-records"
+           class="bg-[#2FFF00] text-black font-medium text-lg px-6 py-3 rounded-full hover:brightness-95">
+            本日の履歴
+        </a>
+    </header>
 
-<body>
+    <nav>
+        <ul class="grid grid-cols-2 gap-6">
+            <li>
+                <a href="/admin/clubs" class="flex bg-gray-200 rounded-xl overflow-hidden h-32">
+                    <div class="flex items-center justify-center flex-1 px-4">
+                        <span class="text-2xl font-bold text-gray-800 text-center">サークル管理</span>
+                    </div>
+                    <div class="w-4 bg-[#9C92F0]"></div>
+                </a>
+            </li>
 
-<h1>管理者メニュー</h1>
+            <li>
+                <a href="/admin/keys" class="flex bg-gray-200 rounded-xl overflow-hidden h-32">
+                    <div class="flex items-center justify-center flex-1 px-4">
+                        <span class="text-2xl font-bold text-gray-800 text-center">鍵管理</span>
+                    </div>
+                    <div class="w-4 bg-[#7EE68C]"></div>
+                </a>
+            </li>
 
-
-<nav>
-
-    <ul>
-
-        <li>
-            <a href="/admin/clubs">
-                サークル管理
-            </a>
-        </li>
-
-
-        <li>
-            <a href="/admin/keys">
-                鍵管理
-            </a>
-        </li>
-
-
-        <li>
-            <a href="/admin/members">
-                メンバー管理
-            </a>
-        </li>
-
-
-        <li>
-            <a href="/admin/borrow-records">
-                貸出履歴
-            </a>
-        </li>
-
-
-        <li>
-            <a href="/admin/reports">
-                活動報告
-            </a>
-        </li>
-
-    </ul>
-
-</nav>
-
-
+            <li>
+                <a href="/admin/members" class="flex bg-gray-200 rounded-xl overflow-hidden h-32">
+                    <div class="flex items-center justify-center flex-1 px-4">
+                        <span class="text-2xl font-bold text-gray-800 text-center">メンバー管理</span>
+                    </div>
+                    <div class="w-4 bg-[#F0A792]"></div>
+                </a>
+            </li>
+            
+            <li>
+                <a href="/admin/reports" class="flex bg-gray-200 rounded-xl overflow-hidden h-32">
+                    <div class="flex items-center justify-center flex-1 px-4">
+                        <span class="text-2xl font-bold text-gray-800 text-center">活動報告</span>
+                    </div>
+                    <div class="w-4 bg-[#F0D992]"></div>
+                </a>
+            </li>
+        </ul>
+    </nav>
 </body>
-
 </html>
