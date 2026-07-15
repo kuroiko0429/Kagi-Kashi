@@ -852,6 +852,13 @@ def export_report(club_id):
                 description
             ])
 
+    def escape_csv_formula(value):
+        # CSV数式インジェクション対策: Excel等が数式と解釈する先頭文字をエスケープする
+        s = str(value)
+        if s and s[0] in ('=', '+', '-', '@', '\t', '\r'):
+            return "'" + s
+        return s
+
     output = io.StringIO()
     output.write('﻿')
 
@@ -859,7 +866,7 @@ def export_report(club_id):
     writer.writerow(['日付', '曜日', '開始時間', '終了時間', '活動時間(時間)', '担当者', '活動内容'])
 
     for row in rows:
-        writer.writerow(row)
+        writer.writerow([escape_csv_formula(cell) for cell in row])
 
     csv_data = output.getvalue()
 
