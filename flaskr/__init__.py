@@ -4,6 +4,7 @@ import flaskr.db as db
 import datetime
 import random
 from .routes.admin import admin_bp
+from .routes.mobile import mobile_bp
 from . import db
 
 def create_app(test_config=None):
@@ -28,6 +29,7 @@ def create_app(test_config=None):
     db.init_app(app)    #DBの初期化
 
     app.register_blueprint(admin_bp)    #Blueprint登録
+    app.register_blueprint(mobile_bp)   #スマホ版(kagi-kashi-ex)のBlueprint登録
 
     # ページの表示
     # メインページ

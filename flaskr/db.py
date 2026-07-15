@@ -77,46 +77,47 @@ def init_db():
     # 2. サークルメンバー (Members)
     # 各サークルIDは1から5
     # 退部ロック検証用に登録日時をシード値として設定（佐藤太陽は60日前[解除可]、鈴木美咲は5日前[ロック中]）
+    # 各サークルの1人目を部長(president)、2人目を一般部員(member)としてシード
     members_data = [
         # ボードゲームサークル (ID: 1)
-        ("S2023001", "佐藤 太陽", 1, "datetime('now', '-60 days', 'localtime')"),
-        ("S2023002", "鈴木 美咲", 1, "datetime('now', '-5 days', 'localtime')"),
+        ("2023001", "佐藤 太陽", 1, "president", "datetime('now', '-60 days', 'localtime')"),
+        ("2023002", "鈴木 美咲", 1, "member", "datetime('now', '-5 days', 'localtime')"),
         # コンピュータ研究会 (ID: 2)
-        ("S2023003", "高橋 蓮", 2, "datetime('now', '-45 days', 'localtime')"),
-        ("S2023004", "田中 葵", 2, "datetime('now', '-10 days', 'localtime')"),
+        ("2023003", "高橋 蓮", 2, "president", "datetime('now', '-45 days', 'localtime')"),
+        ("2023004", "田中 葵", 2, "member", "datetime('now', '-10 days', 'localtime')"),
         # 写真部 (ID: 3)
-        ("S2023005", "渡辺 陸", 3, "datetime('now', '-40 days', 'localtime')"),
-        ("S2023006", "伊藤 結衣", 3, "datetime('now', '-12 days', 'localtime')"),
+        ("2023005", "渡辺 陸", 3, "president", "datetime('now', '-40 days', 'localtime')"),
+        ("2023006", "伊藤 結衣", 3, "member", "datetime('now', '-12 days', 'localtime')"),
         # 軽音楽部 (ID: 4)
-        ("S2023007", "中村 陽翔", 4, "datetime('now', '-50 days', 'localtime')"),
-        ("S2023008", "小林 凛", 4, "datetime('now', '-2 days', 'localtime')"),
+        ("2023007", "中村 陽翔", 4, "president", "datetime('now', '-50 days', 'localtime')"),
+        ("2023008", "小林 凛", 4, "member", "datetime('now', '-2 days', 'localtime')"),
         # アニメーション研究会 (ID: 5)
-        ("S2023009", "加藤 颯太", 5, "datetime('now', '-35 days', 'localtime')"),
-        ("S2023010", "吉田 杏", 5, "datetime('now', '-8 days', 'localtime')"),
+        ("2023009", "加藤 颯太", 5, "president", "datetime('now', '-35 days', 'localtime')"),
+        ("2023010", "吉田 杏", 5, "member", "datetime('now', '-8 days', 'localtime')"),
     ]
-    for student_id, name, club_id, reg_expr in members_data:
+    for student_id, name, club_id, role, reg_expr in members_data:
         db.execute(
-            f"INSERT INTO members (student_id, name, club_id, registered_at) VALUES (?, ?, ?, {reg_expr})",
-            (student_id, name, club_id)
+            f"INSERT INTO members (student_id, name, club_id, role, registered_at) VALUES (?, ?, ?, ?, {reg_expr})",
+            (student_id, name, club_id, role)
         )
 
     # 3. 貸出中のレコード設定 (コンピュータ研究会は現在活動中(active)なので貸出履歴を挿入)
     db.execute(
         "INSERT INTO borrow_records (club_id, student_id, student_name, key_number, borrowed_at) VALUES (?, ?, ?, ?, datetime('now', '-2 hours'))",
-        (2, "S2023003", "高橋 蓮", "K-402")
+        (2, "2023003", "高橋 蓮", "K-402")
     )
     
     # 4. 貸出中のレコード設定 (軽音楽部は現在一時施錠中(temp_locked)なので貸出履歴を挿入)
     db.execute(
         "INSERT INTO borrow_records (club_id, student_id, student_name, key_number, borrowed_at) VALUES (?, ?, ?, ?, datetime('now', '-4 hours'))",
-        (4, "S2023007", "中村 陽翔", "K-204")
+        (4, "2023007", "中村 陽翔", "K-204")
     )
 
     # 5. 活動報告書 (Activity Reports) の初期データ
     reports_data = [
-        (1, "佐藤 太陽", "S2023001", "2026-05-20", "新入生歓迎ゲーム会を実施しました。カタンとカルカソンヌをプレイし、大いに盛り上がりました。"),
-        (2, "高橋 蓮", "S2023003", "2026-05-22", "Webアプリ制作の勉強会を行いました。FlaskとTailwindを用いたモバイル画面設計について議論しました。"),
-        (3, "渡辺 陸", "S2023005", "2026-05-18", "学内ポートレート撮影会を開催しました。構図とライティングについての基礎講座も行いました。"),
+        (1, "佐藤 太陽", "2023001", "2026-05-20", "新入生歓迎ゲーム会を実施しました。カタンとカルカソンヌをプレイし、大いに盛り上がりました。"),
+        (2, "高橋 蓮", "2023003", "2026-05-22", "Webアプリ制作の勉強会を行いました。FlaskとTailwindを用いたモバイル画面設計について議論しました。"),
+        (3, "渡辺 陸", "2023005", "2026-05-18", "学内ポートレート撮影会を開催しました。構図とライティングについての基礎講座も行いました。"),
     ]
     for club_id, reporter_name, student_id, report_date, desc in reports_data:
         db.execute(

@@ -4,6 +4,7 @@ DROP TABLE IF EXISTS members;
 DROP TABLE IF EXISTS borrow_records;
 DROP TABLE IF EXISTS activity_reports;
 DROP TABLE IF EXISTS favorites;
+DROP TABLE IF EXISTS club_messages;
 
 
 CREATE TABLE clubs (
@@ -51,6 +52,9 @@ student_id TEXT NOT NULL,
 name TEXT NOT NULL,
 
 club_id INTEGER NOT NULL,
+
+role TEXT NOT NULL
+DEFAULT 'member',
 
 registered_at TIMESTAMP
 DEFAULT CURRENT_TIMESTAMP,
@@ -116,6 +120,29 @@ PRIMARY KEY (
 student_id,
 club_id
 ),
+
+FOREIGN KEY (club_id)
+REFERENCES clubs(id)
+);
+
+
+
+CREATE TABLE club_messages (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+club_id INTEGER NOT NULL,
+
+student_id TEXT NOT NULL,
+
+sender_name TEXT NOT NULL,
+
+content TEXT NOT NULL,
+
+is_private INTEGER NOT NULL
+DEFAULT 0,
+
+created_at TIMESTAMP
+DEFAULT CURRENT_TIMESTAMP,
 
 FOREIGN KEY (club_id)
 REFERENCES clubs(id)

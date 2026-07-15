@@ -1,0 +1,621 @@
+{% extends 'mobile/layout.html' %}
+
+{% block content %}
+<div class="flex-grow flex flex-col h-full bg-white">
+  
+  <!-- Figmaヘッダー -->
+  <div class="px-4 pt-5 pb-3 flex items-center justify-between border-b border-gray-100 bg-white sticky top-0 z-30 select-none">
+    <div class="flex items-center gap-3">
+      <!-- 矢印ボタン (Figmaの再現) -->
+      <div class="flex items-center gap-2 text-gray-800">
+        <button onclick="history.back()" class="p-1 rounded-lg hover:bg-gray-100 active:scale-90 transition-all cursor-pointer">
+          <i data-lucide="chevron-left" class="w-6 h-6"></i>
+        </button>
+        <button onclick="history.forward()" class="p-1 rounded-lg hover:bg-gray-100 active:scale-90 transition-all cursor-pointer">
+          <i data-lucide="chevron-right" class="w-6 h-6"></i>
+        </button>
+      </div>
+      <!-- タイトル -->
+      <h1 class="text-xl font-bold tracking-tight text-gray-900 ml-1">活動状況</h1>
+    </div>
+
+    <!-- シンプルなログイン状態 & 通知ベル -->
+    <div class="flex items-center gap-2">
+      {% if current_user_id %}
+        <a href="{{ url_for('mobile.settings') }}" title="ユーザー設定" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-100 hover:bg-gray-200 border border-gray-200 text-xs font-medium text-gray-700 transition-all active:scale-95">
+          <span class="max-w-[70px] truncate font-semibold">{{ current_user_name }}</span>
+          <i data-lucide="settings" class="w-3.5 h-3.5 text-gray-400"></i>
+        </a>
+      {% else %}
+        <a href="{{ url_for('mobile.login', next=request.path) }}" class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 border border-gray-200 text-xs font-semibold text-gray-600 hover:text-gray-900 active:scale-95 transition-all">
+          <i data-lucide="user" class="w-3 h-3"></i>
+          <span>ログイン</span>
+        </a>
+      {% endif %}
+
+      <button onclick="handleReload(this)" class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors active:scale-90 cursor-pointer" title="再読み込み">
+        <i data-lucide="rotate-cw" class="w-5 h-5"></i>
+      </button>
+
+      <button onclick="toggleDrawer(true)" class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors active:scale-90 cursor-pointer">
+        <i data-lucide="bell" class="w-5 h-5"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- メインスクロールエリア -->
+  <div class="flex-1 overflow-y-auto no-scrollbar pb-6">
+    
+    <!-- Figma検索バー (グレー背景・丸み・虫眼鏡) -->
+    <div class="px-4 py-3">
+      <div class="relative flex items-center">
+        <i data-lucide="search" class="absolute left-4 w-4 h-4 text-gray-400"></i>
+        <input type="text" id="search-input" onkeyup="filterClubs()" placeholder="名前検索..."
+               class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-gray-100 border-none text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all" />
+        <button id="search-clear" onclick="clearSearch()" class="absolute right-4 hidden text-gray-400 hover:text-gray-600 transition-colors">
+          <i data-lucide="x-circle" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Figmaステータスタブ (色付き下線) -->
+    <div class="px-4 border-b border-gray-100">
+      <div class="flex justify-between text-xs font-bold text-gray-500 select-none pb-0.5">
+        <button onclick="setActiveTab('all')" id="tab-all" 
+                class="tab-btn pb-2 px-1 border-b-2 border-gray-800 text-gray-900 transition-all cursor-pointer">
+          すべて
+        </button>
+        <button onclick="setActiveTab('active')" id="tab-active" 
+                class="tab-btn pb-2 px-1 border-b-2 border-transparent hover:text-gray-950 transition-all cursor-pointer">
+          <span class="flex items-center gap-1 text-emerald-600">活動中</span>
+        </button>
+        <button onclick="setActiveTab('locked')" id="tab-locked" 
+                class="tab-btn pb-2 px-1 border-b-2 border-transparent hover:text-gray-950 transition-all cursor-pointer">
+          <span class="flex items-center gap-1 text-gray-600">施錠中</span>
+        </button>
+        <button onclick="setActiveTab('temp_locked')" id="tab-temp_locked" 
+                class="tab-btn pb-2 px-1 border-b-2 border-transparent hover:text-gray-950 transition-all cursor-pointer">
+          <span class="flex items-center gap-1 text-amber-600">一時施錠中</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- サークルカード一覧 (カテゴリー別にグループ化) -->
+    <div class="py-2 flex flex-col gap-1" id="clubs-container">
+      
+      <!-- 体育系クラブ Section -->
+      <div class="category-section mb-2" id="section-sports" data-expanded="false">
+        <button onclick="toggleSection('sports')" class="w-full px-4 py-3 flex items-center justify-between border-b border-gray-50 bg-white hover:bg-gray-50/80 transition-colors cursor-pointer text-left focus:outline-none">
+          <div class="flex items-center gap-2 select-none">
+            <i data-lucide="trophy" class="w-4 h-4 text-sky-600"></i>
+            <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wider font-extrabold">体育系クラブ</h2>
+          </div>
+          <i data-lucide="chevron-down" id="arrow-sports" class="w-4 h-4 text-gray-400 transition-transform duration-200 -rotate-90"></i>
+        </button>
+        <div id="content-sports" class="grid grid-rows-[0fr] opacity-0 pointer-events-none transition-[grid-template-rows,opacity] duration-300 ease-in-out">
+          <div class="overflow-hidden px-4 py-2 flex flex-col gap-3">
+            {% for key in keys if key.category == 'sports' %}
+              <div class="club-card p-3 rounded-2xl bg-gray-100/90 hover:bg-gray-200/60 flex gap-3 relative transition-all duration-200"
+                   data-id="{{ key.id }}"
+                   data-favorite="{{ 'true' if key.is_favorite else 'false' }}"
+                   data-name="{{ key.name }}"
+                   data-room="{{ key.room_number }}"
+                   data-status="{{ key.status }}">
+                   
+                <!-- 詳細へのリンク -->
+                <a href="{{ url_for('mobile.detail', club_id=key.id) }}" class="absolute inset-0 z-10 rounded-2xl"></a>
+
+                <!-- 水色のアイコン枠 -->
+                <div class="w-14 h-14 rounded-xl bg-sky-300 flex-shrink-0 flex items-center justify-center font-bold text-sky-800 text-[10px] select-none shadow-sm">
+                  アイコン
+                </div>
+
+                <!-- 中央詳細 -->
+                <div class="flex-1 flex flex-col justify-center">
+                  <!-- 部屋番号バッジ & ステータステキスト -->
+                  <div class="flex items-center gap-1.5 text-[9px] font-bold">
+                    <span class="px-1 border border-gray-400 rounded text-gray-600 bg-white">
+                      {{ key.room_number }}
+                    </span>
+                    
+                    {% if key.status == 'active' %}
+                      <span class="text-emerald-600 flex items-center gap-0.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        活動中
+                      </span>
+                    {% elif key.status == 'temp_locked' %}
+                      <span class="text-amber-600 flex items-center gap-0.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                        一時施錠中
+                      </span>
+                    {% else %}
+                      <span class="text-gray-500 flex items-center gap-0.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
+                        施錠中
+                      </span>
+                    {% endif %}
+                  </div>
+
+                  <!-- サークル名 (太字) -->
+                  <h3 class="text-xs font-bold text-gray-900 leading-tight mt-1 truncate">
+                    {{ key.name }}
+                  </h3>
+
+                  <!-- メッセージ欄 -->
+                  <p class="text-[10px] text-gray-500 mt-0.5 line-clamp-1">
+                    {% if key.message %}
+                      {{ key.message }}
+                    {% else %}
+                      {% if key.status == 'active' %}
+                        {{ key.borrower_name }}さんが活動中です
+                      {% else %}
+                        メッセージを残せます
+                      {% endif %}
+                    {% endif %}
+                  </p>
+
+                  <!-- クイックアクションボタン -->
+                  <div class="mt-1.5 flex gap-2 z-20 relative">
+                    {% if key.status != 'locked' %}
+                      {% if key.status == 'active' %}
+                        <button type="button" onclick="handleQuickStatus(event, '{{ key.id }}', 'temp_locked')"
+                                class="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-[9px] font-bold text-white shadow-sm transition-colors cursor-pointer select-none">
+                          一時施錠
+                        </button>
+                      {% elif key.status == 'temp_locked' %}
+                        <button type="button" onclick="handleQuickStatus(event, '{{ key.id }}', 'active')"
+                                class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-[9px] font-bold text-white shadow-sm transition-colors cursor-pointer select-none">
+                          活動再開
+                        </button>
+                      {% endif %}
+                    {% endif %}
+                  </div>
+                </div>
+
+                <!-- 右側：お気に入りスター -->
+                <div class="flex items-center justify-center z-20">
+                  <button onclick="toggleFav(this, '{{ key.id }}')"
+                          class="p-1 rounded-full text-gray-300 hover:text-amber-400 cursor-pointer">
+                    <i data-lucide="star" class="w-5.5 h-5.5 {% if key.is_favorite %}fill-amber-400 text-amber-400{% endif %}"></i>
+                  </button>
+                </div>
+
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- 文化系クラブ Section -->
+      <div class="category-section mb-2" id="section-cultural" data-expanded="false">
+        <button onclick="toggleSection('cultural')" class="w-full px-4 py-3 flex items-center justify-between border-b border-gray-50 bg-white hover:bg-gray-50/80 transition-colors cursor-pointer text-left focus:outline-none">
+          <div class="flex items-center gap-2 select-none">
+            <i data-lucide="palette" class="w-4 h-4 text-violet-600"></i>
+            <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wider font-extrabold">文化系クラブ</h2>
+          </div>
+          <i data-lucide="chevron-down" id="arrow-cultural" class="w-4 h-4 text-gray-400 transition-transform duration-200 -rotate-90"></i>
+        </button>
+        <div id="content-cultural" class="grid grid-rows-[0fr] opacity-0 pointer-events-none transition-[grid-template-rows,opacity] duration-300 ease-in-out">
+          <div class="overflow-hidden px-4 py-2 flex flex-col gap-3">
+            {% for key in keys if key.category == 'cultural' %}
+              <div class="club-card p-3 rounded-2xl bg-gray-100/90 hover:bg-gray-200/60 flex gap-3 relative transition-all duration-200"
+                   data-id="{{ key.id }}"
+                   data-favorite="{{ 'true' if key.is_favorite else 'false' }}"
+                   data-name="{{ key.name }}"
+                   data-room="{{ key.room_number }}"
+                   data-status="{{ key.status }}">
+                   
+                <!-- 詳細へのリンク -->
+                <a href="{{ url_for('mobile.detail', club_id=key.id) }}" class="absolute inset-0 z-10 rounded-2xl"></a>
+
+                <!-- 水色のアイコン枠 -->
+                <div class="w-14 h-14 rounded-xl bg-sky-300 flex-shrink-0 flex items-center justify-center font-bold text-sky-800 text-[10px] select-none shadow-sm">
+                  アイコン
+                </div>
+
+                <!-- 中央詳細 -->
+                <div class="flex-1 flex flex-col justify-center">
+                  <!-- 部屋番号バッジ & ステータステキスト -->
+                  <div class="flex items-center gap-1.5 text-[9px] font-bold">
+                    <span class="px-1 border border-gray-400 rounded text-gray-600 bg-white">
+                      {{ key.room_number }}
+                    </span>
+                    
+                    {% if key.status == 'active' %}
+                      <span class="text-emerald-600 flex items-center gap-0.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        活動中
+                      </span>
+                    {% elif key.status == 'temp_locked' %}
+                      <span class="text-amber-600 flex items-center gap-0.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                        一時施錠中
+                      </span>
+                    {% else %}
+                      <span class="text-gray-500 flex items-center gap-0.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
+                        施錠中
+                      </span>
+                    {% endif %}
+                  </div>
+
+                  <!-- サークル名 (太字) -->
+                  <h3 class="text-xs font-bold text-gray-900 leading-tight mt-1 truncate">
+                    {{ key.name }}
+                  </h3>
+
+                  <!-- メッセージ欄 -->
+                  <p class="text-[10px] text-gray-500 mt-0.5 line-clamp-1">
+                    {% if key.message %}
+                      {{ key.message }}
+                    {% else %}
+                      {% if key.status == 'active' %}
+                        {{ key.borrower_name }}さんが活動中です
+                      {% else %}
+                        メッセージを残せます
+                      {% endif %}
+                    {% endif %}
+                  </p>
+
+                  <!-- クイックアクションボタン -->
+                  <div class="mt-1.5 flex gap-2 z-20 relative">
+                    {% if key.status != 'locked' %}
+                      {% if key.status == 'active' %}
+                        <button type="button" onclick="handleQuickStatus(event, '{{ key.id }}', 'temp_locked')"
+                                class="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-[9px] font-bold text-white shadow-sm transition-colors cursor-pointer select-none">
+                          一時施錠
+                        </button>
+                      {% elif key.status == 'temp_locked' %}
+                        <button type="button" onclick="handleQuickStatus(event, '{{ key.id }}', 'active')"
+                                class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-[9px] font-bold text-white shadow-sm transition-colors cursor-pointer select-none">
+                          活動再開
+                        </button>
+                      {% endif %}
+                    {% endif %}
+                  </div>
+                </div>
+
+                <!-- 右側：お気に入りスター -->
+                <div class="flex items-center justify-center z-20">
+                  <button onclick="toggleFav(this, '{{ key.id }}')" 
+                          class="p-1 rounded-full text-gray-300 hover:text-amber-400 cursor-pointer">
+                    <i data-lucide="star" class="w-5.5 h-5.5 {% if key.is_favorite %}fill-amber-400 text-amber-400{% endif %}"></i>
+                  </button>
+                </div>
+
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- 同好会 Section -->
+      <div class="category-section mb-2" id="section-association" data-expanded="false">
+        <button onclick="toggleSection('association')" class="w-full px-4 py-3 flex items-center justify-between border-b border-gray-50 bg-white hover:bg-gray-50/80 transition-colors cursor-pointer text-left focus:outline-none">
+          <div class="flex items-center gap-2 select-none">
+            <i data-lucide="users" class="w-4 h-4 text-emerald-600"></i>
+            <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wider font-extrabold">同好会</h2>
+          </div>
+          <i data-lucide="chevron-down" id="arrow-association" class="w-4 h-4 text-gray-400 transition-transform duration-200 -rotate-90"></i>
+        </button>
+        <div id="content-association" class="grid grid-rows-[0fr] opacity-0 pointer-events-none transition-[grid-template-rows,opacity] duration-300 ease-in-out">
+          <div class="overflow-hidden px-4 py-2 flex flex-col gap-3">
+            {% for key in keys if key.category == 'association' %}
+              <div class="club-card p-3 rounded-2xl bg-gray-100/90 hover:bg-gray-200/60 flex gap-3 relative transition-all duration-200"
+                   data-id="{{ key.id }}"
+                   data-favorite="{{ 'true' if key.is_favorite else 'false' }}"
+                   data-name="{{ key.name }}"
+                   data-room="{{ key.room_number }}"
+                   data-status="{{ key.status }}">
+                   
+                <!-- 詳細へのリンク -->
+                <a href="{{ url_for('mobile.detail', club_id=key.id) }}" class="absolute inset-0 z-10 rounded-2xl"></a>
+
+                <!-- 水色のアイコン枠 -->
+                <div class="w-14 h-14 rounded-xl bg-sky-300 flex-shrink-0 flex items-center justify-center font-bold text-sky-800 text-[10px] select-none shadow-sm">
+                  アイコン
+                </div>
+
+                <!-- 中央詳細 -->
+                <div class="flex-1 flex flex-col justify-center">
+                  <!-- 部屋番号バッジ & ステータステキスト -->
+                  <div class="flex items-center gap-1.5 text-[9px] font-bold">
+                    <span class="px-1 border border-gray-400 rounded text-gray-600 bg-white">
+                      {{ key.room_number }}
+                    </span>
+                    
+                    {% if key.status == 'active' %}
+                      <span class="text-emerald-600 flex items-center gap-0.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        活動中
+                      </span>
+                    {% elif key.status == 'temp_locked' %}
+                      <span class="text-amber-600 flex items-center gap-0.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                        一時施錠中
+                      </span>
+                    {% else %}
+                      <span class="text-gray-500 flex items-center gap-0.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
+                        施錠中
+                      </span>
+                    {% endif %}
+                  </div>
+
+                  <!-- サークル名 (太字) -->
+                  <h3 class="text-xs font-bold text-gray-900 leading-tight mt-1 truncate">
+                    {{ key.name }}
+                  </h3>
+
+                  <!-- メッセージ欄 -->
+                  <p class="text-[10px] text-gray-500 mt-0.5 line-clamp-1">
+                    {% if key.message %}
+                      {{ key.message }}
+                    {% else %}
+                      {% if key.status == 'active' %}
+                        {{ key.borrower_name }}さんが活動中です
+                      {% else %}
+                        メッセージを残せます
+                      {% endif %}
+                    {% endif %}
+                  </p>
+
+                  <!-- クイックアクションボタン -->
+                  <div class="mt-1.5 flex gap-2 z-20 relative">
+                    {% if key.status != 'locked' %}
+                      {% if key.status == 'active' %}
+                        <button type="button" onclick="handleQuickStatus(event, '{{ key.id }}', 'temp_locked')"
+                                class="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-[9px] font-bold text-white shadow-sm transition-colors cursor-pointer select-none">
+                          一時施錠
+                        </button>
+                      {% elif key.status == 'temp_locked' %}
+                        <button type="button" onclick="handleQuickStatus(event, '{{ key.id }}', 'active')"
+                                class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-[9px] font-bold text-white shadow-sm transition-colors cursor-pointer select-none">
+                          活動再開
+                        </button>
+                      {% endif %}
+                    {% endif %}
+                  </div>
+                </div>
+
+                <!-- 右側：お気に入りスター -->
+                <div class="flex items-center justify-center z-20">
+                  <button onclick="toggleFav(this, '{{ key.id }}')"
+                          class="p-1 rounded-full text-gray-300 hover:text-amber-400 cursor-pointer">
+                    <i data-lucide="star" class="w-5.5 h-5.5 {% if key.is_favorite %}fill-amber-400 text-amber-400{% endif %}"></i>
+                  </button>
+                </div>
+
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      
+      <!-- 検索結果なし -->
+      <div id="no-results" class="hidden text-center py-10">
+        <p class="text-xs text-gray-400 font-medium">該当する部活動が見つかりません</p>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let activeTabFilter = 'all';
+
+  function filterClubs() {
+    const input = document.getElementById('search-input');
+    const clearBtn = document.getElementById('search-clear');
+    const filter = input.value.trim().toLowerCase();
+    
+    if (filter.length > 0) {
+      clearBtn.classList.remove('hidden');
+    } else {
+      clearBtn.classList.add('hidden');
+    }
+    applyFilters();
+  }
+
+  function clearSearch() {
+    const input = document.getElementById('search-input');
+    input.value = '';
+    document.getElementById('search-clear').classList.add('hidden');
+    applyFilters();
+  }
+
+  function setActiveTab(tab) {
+    activeTabFilter = tab;
+    
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.className = 'tab-btn pb-2 px-1 border-b-2 border-transparent hover:text-gray-950 transition-all cursor-pointer';
+    });
+
+    const activeBtn = document.getElementById(`tab-${tab}`);
+    if (tab === 'all') {
+      activeBtn.className = 'tab-btn pb-2 px-1 border-b-2 border-gray-800 text-gray-900 font-extrabold cursor-pointer';
+    } else if (tab === 'active') {
+      activeBtn.className = 'tab-btn pb-2 px-1 border-b-2 border-emerald-500 text-emerald-600 font-extrabold cursor-pointer';
+    } else if (tab === 'locked') {
+      activeBtn.className = 'tab-btn pb-2 px-1 border-b-2 border-gray-400 text-gray-600 font-extrabold cursor-pointer';
+    } else if (tab === 'temp_locked') {
+      activeBtn.className = 'tab-btn pb-2 px-1 border-b-2 border-amber-500 text-amber-600 font-extrabold cursor-pointer';
+    }
+
+    applyFilters();
+  }
+
+  function applyFilters() {
+    const searchVal = document.getElementById('search-input').value.trim().toLowerCase();
+    const sections = document.querySelectorAll('.category-section');
+    let totalVisibleCount = 0;
+
+    sections.forEach(section => {
+      const cards = section.querySelectorAll('.club-card');
+      let sectionVisibleCount = 0;
+
+      cards.forEach(card => {
+        const name = card.getAttribute('data-name').toLowerCase();
+        const room = card.getAttribute('data-room').toLowerCase();
+        const status = card.getAttribute('data-status');
+
+        const matchesSearch = name.includes(searchVal) || room.includes(searchVal);
+        const matchesTab = (activeTabFilter === 'all') || (status === activeTabFilter);
+
+        if (matchesSearch && matchesTab) {
+          card.style.display = 'flex';
+          sectionVisibleCount++;
+          totalVisibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      // セクション内に表示対象のカードが1つもなければセクションごと非表示にする
+      if (sectionVisibleCount === 0) {
+        section.style.display = 'none';
+      } else {
+        section.style.display = 'block';
+        // 検索文字が入力されている、またはステータスが絞り込まれている場合は自動で開く
+        if (searchVal.length > 0 || activeTabFilter !== 'all') {
+          const catId = section.id.replace('section-', '');
+          expandSection(catId);
+        }
+      }
+    });
+
+    const noResults = document.getElementById('no-results');
+    if (totalVisibleCount === 0) {
+      noResults.classList.remove('hidden');
+    } else {
+      noResults.classList.add('hidden');
+    }
+  }
+
+  function toggleSection(cat) {
+    const section = document.getElementById(`section-${cat}`);
+    const isExpanded = section.getAttribute('data-expanded') === 'true';
+    if (isExpanded) {
+      collapseSection(cat);
+    } else {
+      expandSection(cat);
+    }
+  }
+
+  function collapseSection(cat) {
+    const section = document.getElementById(`section-${cat}`);
+    const content = document.getElementById(`content-${cat}`);
+    const arrow = document.getElementById(`arrow-${cat}`);
+    section.setAttribute('data-expanded', 'false');
+    content.classList.remove('grid-rows-[1fr]', 'opacity-100');
+    content.classList.add('grid-rows-[0fr]', 'opacity-0', 'pointer-events-none');
+    arrow.classList.add('-rotate-90');
+  }
+
+  function expandSection(cat) {
+    const section = document.getElementById(`section-${cat}`);
+    const content = document.getElementById(`content-${cat}`);
+    const arrow = document.getElementById(`arrow-${cat}`);
+    section.setAttribute('data-expanded', 'true');
+    content.classList.remove('grid-rows-[0fr]', 'opacity-0', 'pointer-events-none');
+    content.classList.add('grid-rows-[1fr]', 'opacity-100');
+    arrow.classList.remove('-rotate-90');
+  }
+
+  function toggleFav(btn, clubId) {
+    const icon = btn.querySelector('[data-lucide="star"]') || btn.querySelector('svg') || btn.querySelector('i');
+    
+    fetch(`/mobile/club/${clubId}/favorite`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => {
+      if (response.status === 401) {
+        window.location.href = `/login?next=${encodeURIComponent(window.location.pathname)}`;
+        throw new Error('Unauthorized');
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.status === 'success') {
+        const card = btn.closest('.club-card');
+        
+        if (data.is_favorite) {
+          icon.classList.add('fill-amber-400', 'text-amber-400');
+          if (card) card.setAttribute('data-favorite', 'true');
+          showToast('success', data.message);
+        } else {
+          icon.classList.remove('fill-amber-400', 'text-amber-400');
+          if (card) card.setAttribute('data-favorite', 'false');
+          showToast('info', data.message);
+        }
+
+        // Re-sort cards inside the container dynamically
+        if (card) {
+          const container = card.parentElement;
+          const cards = Array.from(container.querySelectorAll('.club-card'));
+          
+          cards.sort((a, b) => {
+            const favA = a.getAttribute('data-favorite') === 'true';
+            const favB = b.getAttribute('data-favorite') === 'true';
+            
+            if (favA !== favB) {
+              return favB ? 1 : -1; // Favorites at the top
+            }
+            
+            const idA = parseInt(a.getAttribute('data-id'));
+            const idB = parseInt(b.getAttribute('data-id'));
+            return idA - idB; // Original ID ordering
+          });
+          
+          cards.forEach(c => container.appendChild(c));
+        }
+      }
+    })
+    .catch(err => {
+      if (err.message !== 'Unauthorized') {
+        console.error(err);
+      }
+    });
+  }
+
+  function handleQuickStatus(event, clubId, newStatus) {
+    if (event) event.stopPropagation();
+    
+    let message = "";
+    if (newStatus === 'temp_locked') {
+      const input = prompt("一時施錠メッセージを入力してください（例：お昼休憩のため13:30に戻ります。省略可能）：");
+      if (input === null) return; // Cancelled
+      message = input.trim();
+    }
+
+    fetch(`/mobile/club/${clubId}/quick_status`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `status=${encodeURIComponent(newStatus)}&message=${encodeURIComponent(message)}`
+    })
+    .then(res => res.json().then(data => ({ status: res.status, data })))
+    .then(({ status, data }) => {
+      if (status === 200) {
+        showToast('success', data.message);
+        setTimeout(() => {
+          location.reload();
+        }, 1000);
+      } else {
+        showToast('error', data.message);
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      showToast('error', '通信エラーが発生しました。');
+    });
+  }
+</script>
+{% endblock %}
