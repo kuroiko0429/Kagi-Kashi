@@ -9,7 +9,18 @@ def admin_page():
 
 @admin_bp.route("/admin/clubs")
 def admin_clubs():
-    return render_template("admin/clubs.html")
+    db = get_db()
+
+    clubs = db.execute("""
+        SELECT *
+        FROM clubs
+        ORDER BY id
+    """).fetchall()
+
+    return render_template(
+        "admin/clubs.html",
+        clubs=clubs
+    )
 
 @admin_bp.route("/admin/members")
 def admin_members():
@@ -160,26 +171,24 @@ def update_club(club_id):
     db.execute("""
         UPDATE clubs
         SET
-            name = ?,
-            room_number = ?,
-            status = ?,
-            message = ?,
-            icon_color = ?,
-            category = ?
-        WHERE id = ?
+            name=?,
+            room_number=?,
+            leader_student_id=?,
+            status=?,
+            category=?
+        WHERE id=?
     """, (
         data["name"],
         data["room_number"],
+        data["leader_student_id"],
         data["status"],
-        data["message"],
-        data["icon_color"],
         data["category"],
         club_id
     ))
 
     db.commit()
 
-    return jsonify({"message": "club updated"})
+    return jsonify({"message":"club updated"})
 
 # サークル削除
 @admin_bp.route("/api/admin/clubs/<int:club_id>", methods=["DELETE"])
