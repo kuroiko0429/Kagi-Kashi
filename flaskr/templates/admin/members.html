@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{{ club.name }} メンバー管理</title>
+</head>
+
+<body>
+
+<h1>{{ club.name }} メンバー管理</h1>
+
+<a href="/admin/members">← サークル選択へ戻る</a>
+
+<hr>
+<h2>メンバー追加</h2>
+<input id="student_id" placeholder="学籍番号">
+<input id="name" placeholder="名前">
+<button onclick="addMember()">追加</button>
+<hr>
+
+<h2>メンバー一覧</h2>
+
+<table border="1">
+
+<tr>
+    <th>ID</th>
+    <th>学籍番号</th>
+    <th>名前</th>
+    <th>操作</th>
+</tr>
+
+
+{% for member in members %}
+
+<tr>
+
+<td>{{ member.id }}</td>
+
+<td>
+<input id="student-{{member.id}}" value="{{member.student_id}}">
+</td>
+
+<td>
+<input id="name-{{member.id}}" value="{{member.name}}">
+</td>
+
+<td>
+
+<button onclick="updateMember({{member.id}})">更新</button>
+
+<button onclick="deleteMember({{member.id}})">削除</button>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+<script>
+
+const clubId = {{ club.id }};
+
+
+// メンバー追加
+async function addMember(){
+
+    const data={
+        student_id:document.getElementById("student_id").value,
+        name:document.getElementById("name").value,
+        club_id:clubId
+    };
+
+
+    await fetch("/api/admin/members",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify(data)
+    });
+
+
+    location.reload();
+
+}
+
+
+
+// メンバー更新
+async function updateMember(id){
+
+    const data={
+        student_id:
+        document.getElementById(`student-${id}`).value,
+
+        name:
+        document.getElementById(`name-${id}`).value
+    };
+
+
+    await fetch(`/api/admin/members/${id}`,{
+        method:"PATCH",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify(data)
+    });
+
+
+    location.reload();
+
+}
+
+
+
+// メンバー削除
+async function deleteMember(id){
+
+    if(!confirm("削除しますか？")){
+        return;
+    }
+
+
+    await fetch(`/api/admin/members/${id}`,{
+        method:"DELETE"
+    });
+
+
+    location.reload();
+
+}
+
+
+</script>
+
+
+</body>
+</html>

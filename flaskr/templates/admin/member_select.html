@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>メンバー管理</title>
+</head>
+
+<body>
+
+<h1>メンバー管理</h1>
+
+<a href="/admin">← 管理者メニューへ戻る</a>
+
+<hr>
+
+<h2>管理するサークルを選択</h2>
+
+<table border="1">
+
+<tr>
+    <th>ID</th>
+    <th>サークル名</th>
+    <th>部屋番号</th>
+    <th>操作</th>
+</tr>
+
+{% for club in clubs %}
+
+<tr>
+    <td>{{ club.id }}</td>
+    <td>{{ club.name }}</td>
+    <td>{{ club.room_number }}</td>
+
+    <td>
+        <a href="/admin/members/{{ club.id }}">
+            メンバー管理
+        </a>
+    </td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+</body>
+</html>

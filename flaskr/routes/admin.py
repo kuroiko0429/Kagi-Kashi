@@ -23,8 +23,42 @@ def admin_clubs():
     )
 
 @admin_bp.route("/admin/members")
-def admin_members():
-    return render_template("admin/members.html")
+def member_select():
+    db = get_db()
+
+    clubs = db.execute("""
+        SELECT *
+        FROM clubs
+        ORDER BY name
+    """).fetchall()
+
+    return render_template(
+        "admin/member_select.html",
+        clubs=clubs
+    )
+
+@admin_bp.route("/admin/members/<int:club_id>")
+def members(club_id):
+    db = get_db()
+
+    club = db.execute("""
+        SELECT *
+        FROM clubs
+        WHERE id=?
+    """, (club_id,)).fetchone()
+
+    members = db.execute("""
+        SELECT *
+        FROM members
+        WHERE club_id=?
+        ORDER BY name
+    """, (club_id,)).fetchall()
+
+    return render_template(
+        "admin/members.html",
+        club=club,
+        members=members
+    )
 
 @admin_bp.route("/admin/keys")
 def admin_keys():
@@ -243,6 +277,26 @@ def add_member():
     db.commit()
 
     return jsonify({"message": "member added"})
+
+# メンバー更新
+@admin_bp.route("/api/admin/members/<int:member_id>", methods=["PATCH"])
+def update_member(member_id):
+    db = get_db()
+    data = request.get_json()
+
+    db.execute("""
+        UPDATE members
+        SET student_id=?, name=?
+        WHERE id=?
+    """, (
+        data["student_id"],
+        data["name"],
+        member_id
+    ))
+
+    db.commit()
+
+    return jsonify({"message":"member updated"})
 
 # メンバー削除
 @admin_bp.route("/api/admin/members/<int:member_id>", methods=["DELETE"])
