@@ -15,7 +15,7 @@ def main():
         keys.append({
             "id": row["id"],
             "name": row["name"],
-            "state": row["status"]!='locked',
+            "status": row["status"],
             "comment": row["message"]
         })
     return render_template('borrow/index.html', keys=keys)
@@ -60,11 +60,15 @@ def send_borrow_data():
             "INSERT INTO borrow_records (club_id, student_id, student_name, key_number, borrowed_at) VALUES (?, ?, ?, ?, datetime('now', 'localtime'))",
             (2, id, id, session["key_id"])
         )
+        conn.execute(
+            "UPDATE clubs SET status = 'active', message = '' WHERE id = ?",
+            (session["key_id"],)
+        )
         conn.execute("""
                 UPDATE keys
                 SET available = ?
                 WHERE id = ?
-            """, (1, session["key_id"]))
+            """, (0, session["key_id"]))
         conn.commit()
         return redirect(url_for('borrow.main'))
     else:
