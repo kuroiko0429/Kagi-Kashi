@@ -1,150 +1,3 @@
-<!-- <!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>サークル管理</title>
-</head>
-<body>
-
-<h1>サークル管理</h1>
-<a href="/admin">← 管理者メニューへ戻る</a>
-
-<hr>
-
-<h2>サークル追加</h2>
-
-<input id="add-name" placeholder="サークル名">
-<input id="add-room" placeholder="部屋番号">
-<input id="add-leader" placeholder="部長ID">
-<input id="add-color" placeholder="アイコン色">
-
-<select id="add-category">
-    <option value="sports">体育系</option>
-    <option value="cultural">文化系</option>
-    <option value="association">同好会</option>
-</select>
-
-<button onclick="addClub()">追加</button>
-
-<hr>
-
-<h2>サークル一覧</h2>
-
-    <table border="1">
-    <tr>
-        <th>ID</th>
-        <th>サークル名</th>
-        <th>部屋番号</th>
-        <th>部長ID</th>
-        <th>状態</th>
-        <th>カテゴリー</th>
-        <th>操作</th>
-    </tr>
-
-    {% for club in clubs %}
-    <tr id="club-{{club.id}}">
-        <td>{{club.id}}</td>
-
-        <td>
-            <input class="name" value="{{club.name}}">
-        </td>
-
-        <td>
-            <input class="room" value="{{club.room_number}}">
-        </td>
-
-        <td>
-            <input class="leader" value="{{club.leader_student_id}}">
-        </td>
-
-        <td>
-            <select class="status">
-                <option value="locked" {% if club.status=="locked" %}selected{% endif %}>
-                    locked
-                </option>
-                <option value="active" {% if club.status=="active" %}selected{% endif %}>
-                    active
-                </option>
-                <option value="temp_locked" {% if club.status=="temp_locked" %}selected{% endif %}>
-                    temp_locked
-                </option>
-            </select>
-        </td>
-
-        <td>
-            <select class="category">
-                <option value="sports" {% if club.category=="sports" %}selected{% endif %}>
-                    体育系
-                </option>
-                <option value="cultural" {% if club.category=="cultural" %}selected{% endif %}>
-                    文化系
-                </option>
-                <option value="association" {% if club.category=="association" %}selected{% endif %}>
-                    同好会
-                </option>
-            </select>
-        </td>
-
-        <td>
-            <button onclick="updateClub({{club.id}})">更新</button>
-            <button onclick="deleteClub({{club.id}})">削除</button>
-        </td>
-    </tr>
-    {% endfor %}
-
-    </table>
-
-    <script>
-        async function addClub(){
-            const data={
-                name:document.getElementById("add-name").value,
-                room_number:document.getElementById("add-room").value,
-                leader_student_id:document.getElementById("add-leader").value,
-                icon_color:document.getElementById("add-color").value,
-                category:document.getElementById("add-category").value
-            };
-            await fetch("/api/admin/clubs",{
-                method:"POST",
-                headers:{
-                    "Content-Type":"application/json"
-                },
-                body:JSON.stringify(data)
-            });
-            location.reload();
-        }
-
-        async function updateClub(id){
-            const row=document.getElementById(`club-${id}`);
-
-            const data={
-                name:row.querySelector(".name").value,
-                room_number:row.querySelector(".room").value,
-                leader_student_id:row.querySelector(".leader").value,
-                status:row.querySelector(".status").value,
-                category:row.querySelector(".category").value
-            };
-            await fetch(`/api/admin/clubs/${id}`,{
-                method:"PATCH",
-                headers:{
-                    "Content-Type":"application/json"
-                },
-                body:JSON.stringify(data)
-            });
-            location.reload();
-        }
-        async function deleteClub(id){
-            if(!confirm("削除しますか？")) return;
-
-            await fetch(`/api/admin/clubs/${id}`,{
-                method:"DELETE"
-            });
-            location.reload();
-        }
-    </script>
-
-</body>
-</html> -->
-
 <!DOCTYPE html>
 <html lang="ja">
 
@@ -165,39 +18,36 @@
     </header>
 
     <hr>
+    <div class="sticky top-0 bg-white z-10 py-4">
+        <h2 class="text-3xl my-4">サークル追加</h2>
 
-    <h2 class="text-3xl my-4">サークル追加</h2>
+        <div class="flex flex-wrap gap-3 mb-4">
 
-    <div class="flex flex-wrap gap-3 mb-4">
-
-        <input id="add-name"
-               placeholder="サークル名"
-               class="border border-black rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-
-        <input id="add-room"
-               placeholder="部屋番号"
-               class="border border-black rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-
-        <input id="add-leader"
-               placeholder="部長ID"
-               class="border border-black rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-
-        <!-- <input id="add-color"
-               placeholder="アイコン色"
-               class="border border-black rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"> -->
-
-        <select id="add-category"
+            <input id="add-name"
+                placeholder="サークル名"
                 class="border border-black rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <option value="sports">体育系</option>
-            <option value="cultural">文化系</option>
-            <option value="association">同好会</option>
-        </select>
 
-        <button onclick="addClub()"
-                class="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-            追加
-        </button>
+            <input id="add-room"
+                placeholder="部屋番号"
+                class="border border-black rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
 
+            <input id="add-leader"
+                placeholder="部長ID"
+                class="border border-black rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+            <select id="add-category"
+                    class="border border-black rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="sports">体育系</option>
+                <option value="cultural">文化系</option>
+                <option value="association">同好会</option>
+            </select>
+
+            <button onclick="addClub()"
+                    class="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                追加
+            </button>
+
+        </div>
     </div>
 
     <hr>
@@ -329,7 +179,6 @@
                 name: document.getElementById("add-name").value,
                 room_number: document.getElementById("add-room").value,
                 leader_student_id: document.getElementById("add-leader").value,
-                // icon_color: document.getElementById("add-color").value,
                 category: document.getElementById("add-category").value
             };
 
