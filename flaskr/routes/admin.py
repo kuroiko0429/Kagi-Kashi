@@ -216,7 +216,7 @@ def add_club():
         data.get("leader_student_id"),
         "locked",
         data.get("message", ""),
-        data["icon_color"],
+        "#04F7B2",
         data["category"]
     ))
 
