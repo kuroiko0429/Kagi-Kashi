@@ -7,58 +7,56 @@
     <title>{{ club.name }} メンバー管理</title>
 </head>
 
-<body>
+<body class="px-12">
+    <a href="/admin/members" class="py-3 block">← サークル選択へ戻る</a>
 
-<h1>{{ club.name }} メンバー管理</h1>
+    <header class="flex justify-between items-center mb-8">
+        <h1 class="text-4xl font-bold text-gray-800">{{ club.name }} メンバー管理</h1>
+    </header>
 
-<a href="/admin/members">← サークル選択へ戻る</a>
+    <hr>
+    <h2 class="text-3xl my-4">メンバー追加</h2>
+    <input id="student_id" placeholder="学籍番号" class="border border-black rounded-md px-3 py-2 mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+    <input id="name" placeholder="名前" class="border border-black rounded-md px-3 py-2 mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+    <button onclick="addMember()" class="inline-block px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">追加</button>
+    <hr>
 
-<hr>
-<h2>メンバー追加</h2>
-<input id="student_id" placeholder="学籍番号">
-<input id="name" placeholder="名前">
-<button onclick="addMember()">追加</button>
-<hr>
+    <h2 class="text-3xl my-4">メンバー一覧</h2>
+    <div class="border border-gray-300 rounded-xl">
+    <table class="w-full text-left border-collapse">
+        <thead class="sticky top-0 bg-gray-100">
+            <tr>
+                <th class="px-4 py-3 border-b border-gray-300">ID</th>
+                <th class="px-4 py-3 border-b border-gray-300">学籍番号</th>
+                <th class="px-4 py-3 border-b border-gray-300">名前</th>
+                <th class="px-4 py-3 border-b border-gray-300">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for member in members %}
 
-<h2>メンバー一覧</h2>
+            <tr class="hover:bg-gray-50">
 
-<table border="1">
+                <td class="px-4 py-3 border-b border-gray-200">{{ member.id }}</td>
 
-<tr>
-    <th>ID</th>
-    <th>学籍番号</th>
-    <th>名前</th>
-    <th>操作</th>
-</tr>
+                <td class="px-4 py-3 border-b border-gray-200">
+                <input id="student-{{member.id}}" value="{{member.student_id}}">
+                </td>
 
+                <td class="px-4 py-3 border-b border-gray-200">
+                <input id="name-{{member.id}}" value="{{member.name}}">
+                </td>
 
-{% for member in members %}
+                <td>
+                <button onclick="updateMember({{member.id}})" class="inline-block px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">更新</button>
+                <button onclick="deleteMember({{member.id}})" class="inline-block px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">削除</button>
+                </td>
+            </tr>
 
-<tr>
-
-<td>{{ member.id }}</td>
-
-<td>
-<input id="student-{{member.id}}" value="{{member.student_id}}">
-</td>
-
-<td>
-<input id="name-{{member.id}}" value="{{member.name}}">
-</td>
-
-<td>
-
-<button onclick="updateMember({{member.id}})">更新</button>
-
-<button onclick="deleteMember({{member.id}})">削除</button>
-
-</td>
-
-</tr>
-
-{% endfor %}
-
-</table>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
 <script>
 
