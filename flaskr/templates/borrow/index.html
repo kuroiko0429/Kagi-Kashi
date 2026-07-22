@@ -158,7 +158,7 @@
     // 借りるボタンのイベント
     document.querySelector("#borrow_button").addEventListener("click", async function() {
       if (selected_id && selected_name) {
-        await fetch("/select_row", {
+        await fetch("/borrow/select_row", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -168,7 +168,7 @@
             clab_name: selected_name
           })
         });
-        window.location.href = "/input";
+        window.location.href = "/borrow/input";
       } else {
         alert("借りる鍵を選択してください。");
       }
