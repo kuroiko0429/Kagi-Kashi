@@ -67,7 +67,7 @@ def create_app(test_config=None):
         print('POSTデータ受け取ったので処理します')
         id = request.form['student_id'].strip()
         if id[0] == "s":
-            id.pop(0)
+            id = id[1:]
 
         text = str(
             f"id: {random.randint(-2147483648, 2147483647)}\n"
@@ -80,10 +80,12 @@ def create_app(test_config=None):
         
         if len(id) == 7:
             print(text)
-            db.execute(
+            conn = db.get_db()
+            conn.execute(
                 "INSERT INTO borrow_records (club_id, student_id, student_name, key_number, borrowed_at) VALUES (?, ?, ?, ?, datetime('now', 'localtime'))",
                 (2, id, id, session["key_id"])
             )
+            conn.commit()
             return text
         else:
             return "不正な学籍番号です"
