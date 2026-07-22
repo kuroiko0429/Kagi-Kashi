@@ -80,10 +80,12 @@ def create_app(test_config=None):
         
         if len(id) == 7:
             print(text)
-            db.execute(
+            conn = db.get_db()
+            conn.execute(
                 "INSERT INTO borrow_records (club_id, student_id, student_name, key_number, borrowed_at) VALUES (?, ?, ?, ?, datetime('now', 'localtime'))",
                 (2, id, id, session["key_id"])
             )
+            conn.commit()
             return text
         else:
             return "不正な学籍番号です"
