@@ -60,6 +60,11 @@ def send_borrow_data():
             "INSERT INTO borrow_records (club_id, student_id, student_name, key_number, borrowed_at) VALUES (?, ?, ?, ?, datetime('now', 'localtime'))",
             (2, id, id, session["key_id"])
         )
+        conn.execute("""
+                UPDATE keys
+                SET available = ?
+                WHERE id = ?
+            """, (1, session["key_id"]))
         conn.commit()
         return redirect(url_for('borrow.main'))
     else:
