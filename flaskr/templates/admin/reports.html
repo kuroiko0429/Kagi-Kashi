@@ -2,63 +2,72 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <title>活動報告管理</title>
 </head>
 
-<body>
+<body class="px-12">
 
-<h1>活動報告管理</h1>
-
-<a href="/admin">← 管理者メニューへ戻る</a>
+<a href="/admin" class="py-3 block">← 管理者メニューへ戻る</a>
+<header class="flex justify-between items-center mb-8">
+    <h1 class="text-4xl font-bold text-gray-800">活動報告管理</h1>
+</header>
 
 <hr>
 
-<h2>活動報告一覧</h2>
+<h2 class="text-3xl my-4">活動報告一覧</h2>
+<div class="border border-gray-300 rounded-xl">
+    <table class="w-full text-left border-collapse">
+        <thead class="sticky top^0 bg-gray-100">
+            <tr>
+                <th class="px-4 py-3 border-b border-gray-300">ID</th>
+                <th class="px-4 py-3 border-b border-gray-300">サークル</th>
+                <th class="px-4 py-3 border-b border-gray-300">報告者</th>
+                <th class="px-4 py-3 border-b border-gray-300">学生ID</th>
+                <th class="px-4 py-3 border-b border-gray-300">活動日</th>
+                <th class="px-4 py-3 border-b border-gray-300">活動内容</th>
+                <th class="px-4 py-3 border-b border-gray-300">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for report in reports %}
 
-<table border="1">
+            <tr class="hover:bg-gray-50">
 
-<tr>
-<th>ID</th>
-<th>サークル</th>
-<th>報告者</th>
-<th>学生ID</th>
-<th>活動日</th>
-<th>活動内容</th>
-<th>操作</th>
-</tr>
+            <td class="px-4 py-3 border-b border-gray-200">{{ report.id }}</td>
 
-{% for report in reports %}
+            <td class="px-4 py-3 border-b border-gray-200">{{ report.club_name }}</td>
 
-<tr>
+            <td class="px-4 py-3 border-b border-gray-200">
+            <input id="reporter-{{ report.id }}" value="{{ report.reporter_name }}">
+            </td>
 
-<td>{{ report.id }}</td>
+            <td class="px-4 py-3 border-b border-gray-200">
+            <input id="student-{{ report.id }}" value="{{ report.student_id }}">
+            </td>
 
-<td>{{ report.club_name }}</td>
+            <td class="px-4 py-3 border-b border-gray-200">
+            <input type="date" id="date-{{ report.id }}" value="{{ report.report_date }}">
+            </td>
 
-<td>
-<input id="reporter-{{ report.id }}" value="{{ report.reporter_name }}">
-</td>
+            <td class="px-4 py-3 border-b border-gray-200">
+            <textarea id="desc-{{ report.id }}">{{ report.description }}</textarea>
+            </td>
 
-<td>
-<input id="student-{{ report.id }}" value="{{ report.student_id }}">
-</td>
+            <td class="px-4 py-3 border-b border-gray-200">
+            <button onclick="updateReport({{ report.id }})" class="inline-block px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">更新</button>
+            <button onclick="deleteReport({{ report.id }})" class="inline-block px-4 py-1.5 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700">削除</button>
+            </td>
 
-<td>
-<input type="date" id="date-{{ report.id }}" value="{{ report.report_date }}">
-</td>
+            </tr>
 
-<td>
-<textarea id="desc-{{ report.id }}">{{ report.description }}</textarea>
-</td>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
-<td>
-<button onclick="updateReport({{ report.id }})">更新</button>
-<button onclick="deleteReport({{ report.id }})">削除</button>
-</td>
 
-</tr>
 
-{% endfor %}
 
 </table>
 

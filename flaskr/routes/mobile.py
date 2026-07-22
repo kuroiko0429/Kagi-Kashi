@@ -14,7 +14,7 @@ from flask import Blueprint, Response, current_app, flash, jsonify, redirect, re
 
 from ..db import get_db
 
-mobile_bp = Blueprint("mobile", __name__, url_prefix="/mobile")
+mobile_bp = Blueprint("mobile", __name__)
 
 
 @mobile_bp.context_processor

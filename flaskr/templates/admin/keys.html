@@ -2,20 +2,21 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <title>鍵管理</title>
 </head>
 
-<body>
+<body class="px-12">
+    <a href="/admin" class="py-3 block">← 管理者メニューへ戻る</a>
 
-<h1>鍵管理</h1>
-
-<a href="/admin">← 管理者メニューへ戻る</a>
+    <header class="flex justify-between items-center mb-8">
+        <h1 class="text-4xl font-bold">鍵管理</h1>
+    </header>
 
 <hr>
 
-<h2>鍵追加</h2>
-
-<select id="club_id">
+<h2 class="text-3xl my-4">鍵追加</h2>
+<select id="club_id" class="border border-black rounded-md px-3 py-2 mb-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
 {% for club in clubs %}
 <option value="{{ club.id }}">
 {{ club.name }}
@@ -23,73 +24,79 @@
 {% endfor %}
 </select>
 
-<input id="key_number" placeholder="鍵番号">
+<input id="key_number" placeholder="鍵番号" class="border border-black rounded-md px-3 py-2 mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
 
-<button onclick="addKey()">追加</button>
+<button onclick="addKey()" class="inline-block px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">追加</button>
 
 <hr>
 
-<h2>鍵一覧</h2>
+<h2 class="text-3xl my-4">鍵一覧</h2>
+<div class="max-h-60 overflow-y-auto border border-gray-300 rounded-xl">
+    <table class="w-full text-left border-collapse">
+        <thead class="sticky top-0 bg-gray-100">
+            <tr>
+                <th class="px-4 py-3 border-b border-gray-300">ID</th>
+                <th class="px-4 py-3 border-b border-gray-300">鍵番号</th>
+                <th class="px-4 py-3 border-b border-gray-300">サークル</th>
+                <th class="px-4 py-3 border-b border-gray-300">状態</th>
+                <th class="px-4 py-3 border-b border-gray-300">操作</th>
+            </tr>
+        </thead>
+        
+        <tbody>
+            {% for key in keys %}
+        
+            <tr class="hover:bg-gray-50">
+            
+            <td class="px-4 py-3 border-b border-gray-200">
+            {{ key.id }}
+            </td>
+            
+            <td class="px-4 py-3 border-b border-gray-200">
+            {{ key.key_number }}
+            </td>
+            
+            <td class="px-4 py-3 border-b border-gray-200">
+            {{ key.club_name }}
+            </td>
+            
+            <td class="px-4 py-3 border-b border-gray-200">
+            
+            {% if key.available == 1 %}
+            利用可能
+            {% else %}
+            貸出中
+            {% endif %}
+            
+            </td>
+            
+            <td>
+            
+            {% if key.available == 1 %}
+            
+            <button onclick="updateKey({{ key.id }},0)" class="inline-block px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
+            貸出
+            </button>
+            
+            {% else %}
+            
+            <button onclick="updateKey({{ key.id }},1)" class="inline-block px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
+            返却
+            </button>
+            
+            {% endif %}
+            
+            </td>
+            
+            </tr>
+        
+            {% endfor %}
+        </tbody>
+        
+        
+        </table>
+</div>
 
-<table border="1">
-
-<tr>
-<th>ID</th>
-<th>鍵番号</th>
-<th>サークル</th>
-<th>状態</th>
-<th>操作</th>
-</tr>
-
-{% for key in keys %}
-
-<tr>
-
-<td>
-{{ key.id }}
-</td>
-
-<td>
-{{ key.key_number }}
-</td>
-
-<td>
-{{ key.club_name }}
-</td>
-
-<td>
-
-{% if key.available == 1 %}
-利用可能
-{% else %}
-貸出中
-{% endif %}
-
-</td>
-
-<td>
-
-{% if key.available == 1 %}
-
-<button onclick="updateKey({{ key.id }},0)">
-貸出
-</button>
-
-{% else %}
-
-<button onclick="updateKey({{ key.id }},1)">
-返却
-</button>
-
-{% endif %}
-
-</td>
-
-</tr>
-
-{% endfor %}
-
-</table>
 
 
 <script>
