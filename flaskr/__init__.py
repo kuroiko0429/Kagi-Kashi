@@ -67,7 +67,7 @@ def create_app(test_config=None):
         print('POSTデータ受け取ったので処理します')
         id = request.form['student_id'].strip()
         if id[0] == "s":
-            id.pop(0)
+            id = id[1:]
 
         text = str(
             f"id: {random.randint(-2147483648, 2147483647)}\n"
