@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -143,4 +143,245 @@
     </script>
 
 </body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>サークル管理</title>
+</head>
+
+<body class="px-12">
+
+    <a href="/admin" class="py-3 block">← 管理者メニューへ戻る</a>
+
+    <header class="flex justify-between items-center mb-8">
+        <h1 class="text-4xl font-bold text-gray-800">
+            サークル管理
+        </h1>
+    </header>
+
+    <hr>
+
+    <h2 class="text-3xl my-4">サークル追加</h2>
+
+    <div class="flex flex-wrap gap-3 mb-4">
+
+        <input id="add-name"
+               placeholder="サークル名"
+               class="border border-black rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+        <input id="add-room"
+               placeholder="部屋番号"
+               class="border border-black rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+        <input id="add-leader"
+               placeholder="部長ID"
+               class="border border-black rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+        <!-- <input id="add-color"
+               placeholder="アイコン色"
+               class="border border-black rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"> -->
+
+        <select id="add-category"
+                class="border border-black rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="sports">体育系</option>
+            <option value="cultural">文化系</option>
+            <option value="association">同好会</option>
+        </select>
+
+        <button onclick="addClub()"
+                class="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            追加
+        </button>
+
+    </div>
+
+    <hr>
+
+    <h2 class="text-3xl my-4">サークル一覧</h2>
+
+    <div class="border border-gray-300 rounded-xl overflow-hidden">
+
+        <table class="w-full text-left border-collapse">
+
+            <thead class="bg-gray-100">
+
+                <tr>
+                    <th class="px-4 py-3 border-b border-gray-300">ID</th>
+                    <th class="px-4 py-3 border-b border-gray-300">サークル名</th>
+                    <th class="px-4 py-3 border-b border-gray-300">部屋番号</th>
+                    <th class="px-4 py-3 border-b border-gray-300">部長ID</th>
+                    <th class="px-4 py-3 border-b border-gray-300">状態</th>
+                    <th class="px-4 py-3 border-b border-gray-300">カテゴリー</th>
+                    <th class="px-4 py-3 border-b border-gray-300 text-center">操作</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            {% for club in clubs %}
+
+                <tr id="club-{{club.id}}" class="hover:bg-gray-50">
+
+                    <td class="px-4 py-3 border-b border-gray-200">
+                        {{club.id}}
+                    </td>
+
+                    <td class="px-4 py-3 border-b border-gray-200">
+                        <input class="name border border-gray-300 rounded px-2 py-1 w-full"
+                               value="{{club.name}}">
+                    </td>
+
+                    <td class="px-4 py-3 border-b border-gray-200">
+                        <input class="room border border-gray-300 rounded px-2 py-1 w-full"
+                               value="{{club.room_number}}">
+                    </td>
+
+                    <td class="px-4 py-3 border-b border-gray-200">
+                        <input class="leader border border-gray-300 rounded px-2 py-1 w-full"
+                               value="{{club.leader_student_id}}">
+                    </td>
+
+                    <td class="px-4 py-3 border-b border-gray-200">
+
+                        <select class="status border border-gray-300 rounded px-2 py-1 w-full">
+
+                            <option value="locked"
+                                {% if club.status=="locked" %}selected{% endif %}>
+                                locked
+                            </option>
+
+                            <option value="active"
+                                {% if club.status=="active" %}selected{% endif %}>
+                                active
+                            </option>
+
+                            <option value="temp_locked"
+                                {% if club.status=="temp_locked" %}selected{% endif %}>
+                                temp_locked
+                            </option>
+
+                        </select>
+
+                    </td>
+
+                    <td class="px-4 py-3 border-b border-gray-200">
+
+                        <select class="category border border-gray-300 rounded px-2 py-1 w-full">
+
+                            <option value="sports"
+                                {% if club.category=="sports" %}selected{% endif %}>
+                                体育系
+                            </option>
+
+                            <option value="cultural"
+                                {% if club.category=="cultural" %}selected{% endif %}>
+                                文化系
+                            </option>
+
+                            <option value="association"
+                                {% if club.category=="association" %}selected{% endif %}>
+                                同好会
+                            </option>
+
+                        </select>
+
+                    </td>
+
+                    <td class="px-4 py-3 border-b border-gray-200">
+
+                        <div class="text-center">
+
+                            <button onclick="updateClub({{club.id}})"
+                                    class="inline-block px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
+                                更新
+                            </button>
+
+                            <button onclick="deleteClub({{club.id}})"
+                                    class="inline-block px-4 py-1.5 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700">
+                                削除
+                            </button>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <script>
+
+        async function addClub() {
+
+            const data = {
+                name: document.getElementById("add-name").value,
+                room_number: document.getElementById("add-room").value,
+                leader_student_id: document.getElementById("add-leader").value,
+                // icon_color: document.getElementById("add-color").value,
+                category: document.getElementById("add-category").value
+            };
+
+            await fetch("/api/admin/clubs", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            });
+
+            location.reload();
+        }
+
+        async function updateClub(id) {
+
+            const row = document.getElementById(`club-${id}`);
+
+            const data = {
+                name: row.querySelector(".name").value,
+                room_number: row.querySelector(".room").value,
+                leader_student_id: row.querySelector(".leader").value,
+                status: row.querySelector(".status").value,
+                category: row.querySelector(".category").value
+            };
+
+            await fetch(`/api/admin/clubs/${id}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            });
+
+            location.reload();
+        }
+
+        async function deleteClub(id) {
+
+            if (!confirm("削除しますか？")) {
+                return;
+            }
+
+            await fetch(`/api/admin/clubs/${id}`, {
+                method: "DELETE"
+            });
+
+            location.reload();
+        }
+
+    </script>
+
+</body>
+
 </html>
