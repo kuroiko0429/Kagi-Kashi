@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>活動報告管理</title>
+</head>
+
+<body>
+
+<h1>活動報告管理</h1>
+
+<a href="/admin">← 管理者メニューへ戻る</a>
+
+<hr>
+
+<h2>活動報告一覧</h2>
+
+<table border="1">
+
+<tr>
+<th>ID</th>
+<th>サークル</th>
+<th>報告者</th>
+<th>学生ID</th>
+<th>活動日</th>
+<th>活動内容</th>
+<th>操作</th>
+</tr>
+
+{% for report in reports %}
+
+<tr>
+
+<td>{{ report.id }}</td>
+
+<td>{{ report.club_name }}</td>
+
+<td>
+<input id="reporter-{{ report.id }}" value="{{ report.reporter_name }}">
+</td>
+
+<td>
+<input id="student-{{ report.id }}" value="{{ report.student_id }}">
+</td>
+
+<td>
+<input type="date" id="date-{{ report.id }}" value="{{ report.report_date }}">
+</td>
+
+<td>
+<textarea id="desc-{{ report.id }}">{{ report.description }}</textarea>
+</td>
+
+<td>
+<button onclick="updateReport({{ report.id }})">更新</button>
+<button onclick="deleteReport({{ report.id }})">削除</button>
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+<script>
+
+async function updateReport(id){
+
+    const data={
+        reporter_name:document.getElementById(`reporter-${id}`).value,
+        student_id:document.getElementById(`student-${id}`).value,
+        report_date:document.getElementById(`date-${id}`).value,
+        description:document.getElementById(`desc-${id}`).value
+    };
+
+    await fetch(`/api/admin/activity-reports/${id}`,{
+        method:"PATCH",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify(data)
+    });
+
+    location.reload();
+
+}
+
+async function deleteReport(id){
+
+    if(!confirm("この活動報告を削除しますか？")){
+        return;
+    }
+
+    await fetch(`/api/admin/activity-reports/${id}`,{
+        method:"DELETE"
+    });
+
+    location.reload();
+
+}
+
+</script>
+
+</body>
+</html>

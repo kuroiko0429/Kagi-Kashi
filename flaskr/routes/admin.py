@@ -114,7 +114,26 @@ def admin_borrow():
 
 @admin_bp.route("/admin/reports")
 def admin_reports():
-    return render_template("admin/reports.html")
+    db = get_db()
+
+    reports = db.execute("""
+        SELECT
+            activity_reports.id,
+            activity_reports.reporter_name,
+            activity_reports.student_id,
+            activity_reports.report_date,
+            activity_reports.description,
+            clubs.name AS club_name
+        FROM activity_reports
+        JOIN clubs
+        ON activity_reports.club_id = clubs.id
+        ORDER BY activity_reports.report_date DESC
+    """).fetchall()
+
+    return render_template(
+        "admin/reports.html",
+        reports=reports
+    )
 
 # 鍵一覧（全鍵＋サークル情報）
 @admin_bp.route("/api/admin/keys", methods=["GET"])
@@ -376,3 +395,41 @@ def get_reports():
     """).fetchall()
 
     return jsonify([dict(r) for r in rows])
+
+@admin_bp.route("/api/admin/activity-reports/<int:report_id>", methods=["PATCH"])
+def update_report(report_id):
+    db = get_db()
+    data = request.get_json()
+
+    db.execute("""
+        UPDATE activity_reports
+        SET
+            reporter_name=?,
+            student_id=?,
+            report_date=?,
+            description=?
+        WHERE id=?
+    """,(
+        data["reporter_name"],
+        data["student_id"],
+        data["report_date"],
+        data["description"],
+        report_id
+    ))
+
+    db.commit()
+
+    return jsonify({"message":"report updated"})
+
+@admin_bp.route("/api/admin/activity-reports/<int:report_id>", methods=["DELETE"])
+def delete_report(report_id):
+    db = get_db()
+
+    db.execute("""
+        DELETE FROM activity_reports
+        WHERE id=?
+    """,(report_id,))
+
+    db.commit()
+
+    return jsonify({"message":"report deleted"})
