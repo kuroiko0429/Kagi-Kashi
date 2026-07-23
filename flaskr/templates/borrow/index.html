@@ -49,7 +49,7 @@
                   data-name="{{ key.name }}"
                   data-id="{{ key.id }}"
                   data-state="{% if key.status == 0 %}borrowed{% else %}available{% endif %}">
-                <td class="px-4 font-mono">{{ key.id }}</td>
+                <td class="px-4 font-mono">{{ key.number }}</td>
                 <td class="px-4 font-medium">{{ key.name }}</td>
                 <td class="px-4">
                   {% if key.status == 0 %}

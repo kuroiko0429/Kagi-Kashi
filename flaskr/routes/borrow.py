@@ -24,7 +24,8 @@ def main():
     for key in rows:
         print(key.keys())
         keys.append({
-            "id": key["key_number"],
+            "id": key["id"],
+            "number": key["key_number"],
             "name": key["club_name"],
             "status": key["available"],
             "comment": key["club_message"]
@@ -35,7 +36,7 @@ def main():
 @borrow_bp.route("/select_row", methods=["POST"])
 def select_row():
     data = request.get_json()
-    session["key_id"] = data["key_id"]
+    session["id"] = data["key_id"]
     session["clab_name"] = data["clab_name"]
     print(f"id: {data["key_id"]}, name: {data["clab_name"]}")
     return {"status": "ok"}
@@ -59,28 +60,38 @@ def send_borrow_data():
         f"id: {random.randint(-2147483648, 2147483647)}\n"
         f"clab_name: {session["clab_name"]}\n"
         f"student_id: {id}\n"
-        f"key_id: {session["key_id"]}\n"
+        f"key_id: {session["id"]}\n"
         f"borrowed_at: {datetime.datetime.now()}\n"
         f"returned_at: {1}"
     )
 
+    # 部活のメンバーでなければ借りられないようにする
+    club_members = get_db().execute(
+        "SELECT student_id FROM members WHERE club_id = ?",
+        (session["id"],)
+    ).fetchall()
+    if not any(member["student_id"] == id for member in club_members):
+        return render_template('borrow/result.html', message="この部活のメンバーではありません。")
+
     if len(id) == 7:
         print(text)
         conn = get_db()
+        key_number = conn.execute(
+            "SELECT key_number FROM keys WHERE id = ?",
+            (session["id"],)
+        ).fetchone()["key_number"]
         conn.execute(
             "INSERT INTO borrow_records (club_id, student_id, student_name, key_number, borrowed_at) VALUES (?, ?, ?, ?, datetime('now', 'localtime'))",
-            (2, id, id, session["key_id"])
+            (session["id"], id, id, key_number)
         )
         conn.execute(
             "UPDATE clubs SET status = 'active', message = '' WHERE id = ?",
-            (session["key_id"],)
+            (session["id"],)
         )
         conn.execute("""
                 UPDATE keys
                 SET available = ?
                 WHERE id = ?
-            """, (0, session["key_id"]))
+            """, (0, session["id"]))
         conn.commit()
-        return redirect(url_for('borrow.main'))
-    else:
-        pass
+        return render_template('borrow/result.html', message="借りる処理が完了しました。")
