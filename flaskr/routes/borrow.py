@@ -8,15 +8,26 @@ borrow_bp = Blueprint("borrow", __name__, url_prefix="/borrow")
 # メインページ
 @borrow_bp.route('/')
 def main():
-    cur = get_db().cursor()
-    cur.execute('SELECT * FROM clubs')
+    rows = get_db().execute("""
+        SELECT
+            keys.id,
+            keys.key_number,
+            keys.available,
+            clubs.id AS club_id,
+            clubs.name AS club_name,
+            clubs.message AS club_message
+        FROM keys
+        JOIN clubs ON keys.club_id = clubs.id
+        ORDER BY keys.id
+    """).fetchall()
     keys = []
-    for row in cur.fetchall():
+    for key in rows:
+        print(key.keys())
         keys.append({
-            "id": row["id"],
-            "name": row["name"],
-            "status": row["status"],
-            "comment": row["message"]
+            "id": key["key_number"],
+            "name": key["club_name"],
+            "status": key["available"],
+            "comment": key["club_message"]
         })
     return render_template('borrow/index.html', keys=keys)
 
@@ -52,7 +63,7 @@ def send_borrow_data():
         f"borrowed_at: {datetime.datetime.now()}\n"
         f"returned_at: {1}"
     )
-    
+
     if len(id) == 7:
         print(text)
         conn = get_db()
