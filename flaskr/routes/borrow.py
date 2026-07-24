@@ -5,6 +5,13 @@ from ..db import get_db
 
 borrow_bp = Blueprint("borrow", __name__, url_prefix="/borrow")
 
+# 先頭の"s"/"S"を取り除いて学籍番号を比較できる形にする
+def normalize_student_id(student_id):
+    student_id = student_id.strip()
+    if student_id[:1].lower() == "s":
+        student_id = student_id[1:]
+    return student_id
+
 # clubs.status(locked/active/temp_locked) と一覧の状態表示(available/borrowed/locked)の対応
 STATUS_TO_STATE = {
     "locked": "available",
@@ -58,9 +65,7 @@ def send_borrow_data():
     # id, clab_id, student_id, student_name, key_num, borrowed_at, returned_at
     # id?, 部活名, 学籍番号, （学生の名前）, 鍵番号, 借りた時間, 返した時間
     print('POSTデータ受け取ったので処理します')
-    id = request.form['student_id'].strip()
-    if id[0] == "s":
-        id = id[1:]
+    id = normalize_student_id(request.form['student_id'])
 
     club_id = session["id"]
 
@@ -78,7 +83,7 @@ def send_borrow_data():
         "SELECT student_id FROM members WHERE club_id = ?",
         (club_id,)
     ).fetchall()
-    if not any(member["student_id"] == id for member in club_members):
+    if not any(normalize_student_id(member["student_id"]) == id for member in club_members):
         return render_template('borrow/result.html', message="この部活のメンバーではありません。")
 
     if len(id) == 7:
