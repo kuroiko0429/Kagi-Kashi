@@ -45,18 +45,19 @@
           </thead>
           <tbody class="divide-y divide-gray-100">
             {% for key in keys %}
-              <tr class="key-row h-12 hover:bg-gray-50 transition-colors text-sm" 
-                  data-name="{{ key.name }}" 
+              <tr class="key-row h-12 hover:bg-gray-50 transition-colors text-sm"
+                  data-name="{{ key.name }}"
                   data-id="{{ key.id }}"
-                  data-state="{% if key.state == 1 %}borrowed{% elif key.state == 2 %}locked{% else %}available{% endif %}">
-                <td class="px-4 font-mono">{{ key.id }}</td>
+                  data-borrowed="{{ 'true' if key.borrowed else 'false' }}"
+                  data-state="{{ key.state }}">
+                <td class="px-4 font-mono">{{ key.key_number or '-' }}</td>
                 <td class="px-4 font-medium">{{ key.name }}</td>
                 <td class="px-4">
-                  {% if key.state == 1 %}
+                  {% if key.state == 'borrowed' %}
                     <span class="inline-flex justify-center items-center w-24 h-7 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
                       貸出中
                     </span>
-                  {% elif key.state == 2 %}
+                  {% elif key.state == 'locked' %}
                     <span class="inline-flex justify-center items-center w-24 h-7 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 border border-yellow-200">
                       一時施錠中
                     </span>
@@ -81,7 +82,23 @@
 
     </div>
   </main>
-  
+
+  <div id="return-confirm-overlay" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div class="w-80 rounded-xl bg-white p-6 shadow-lg">
+      <p class="text-base font-medium text-gray-800">
+        「<span id="return-confirm-name"></span>」の鍵を返却しますか？
+      </p>
+      <div class="mt-6 flex justify-end gap-3">
+        <button id="return-cancel-btn" class="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors">
+          キャンセル
+        </button>
+        <button id="return-confirm-btn" class="px-4 py-2 rounded-lg text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors">
+          返却する
+        </button>
+      </div>
+    </div>
+  </div>
+
   <footer class="w-full text-center py-2 text-xs text-gray-500 shrink-0 bg-gray-200">
     &copy; 2026
   </footer>
@@ -93,8 +110,23 @@
   </style>
 
   <script>
-    let selected_id, selected_name;
+    let selected_id, selected_name, selected_borrowed;
     let currentFilter = 'all';
+
+    const borrowButton = document.querySelector("#borrow_button");
+
+    // 選択中の部屋の貸出状況に応じてボタンの見た目を切り替える
+    function updateBorrowButton() {
+      if (selected_borrowed) {
+        borrowButton.textContent = "返す";
+        borrowButton.classList.remove('bg-green-500', 'hover:bg-green-600');
+        borrowButton.classList.add('bg-red-500', 'hover:bg-red-600');
+      } else {
+        borrowButton.textContent = "借りる";
+        borrowButton.classList.remove('bg-red-500', 'hover:bg-red-600');
+        borrowButton.classList.add('bg-green-500', 'hover:bg-green-600');
+      }
+    }
 
     // 検索とフィルターの状態を同時に反映する関数
     function updateVisibleRows() {
@@ -118,6 +150,8 @@
             row.classList.remove('selected');
             selected_id = null;
             selected_name = null;
+            selected_borrowed = null;
+            updateBorrowButton();
           }
         }
       });
@@ -152,25 +186,59 @@
         this.classList.add('selected');
         selected_id = this.dataset.id;
         selected_name = this.dataset.name;
+        selected_borrowed = this.dataset.borrowed === "true";
+        updateBorrowButton();
       });
     });
 
-    // 借りるボタンのイベント
-    document.querySelector("#borrow_button").addEventListener("click", async function() {
-      if (selected_id && selected_name) {
-        await fetch("/borrow/select_row", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            key_id:    selected_id,
-            clab_name: selected_name
-          })
-        });
-        window.location.href = "/borrow/input";
+    // 返却確認モーダル
+    const returnOverlay = document.getElementById("return-confirm-overlay");
+    const returnConfirmName = document.getElementById("return-confirm-name");
+
+    document.getElementById("return-cancel-btn").addEventListener("click", function() {
+      returnOverlay.classList.add("hidden");
+    });
+
+    document.getElementById("return-confirm-btn").addEventListener("click", async function() {
+      returnOverlay.classList.add("hidden");
+      await fetch("/borrow/return_row", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          club_id: selected_id
+        })
+      });
+      window.location.reload();
+    });
+
+    // 借りる/返すボタンのイベント
+    borrowButton.addEventListener("click", function() {
+      if (!selected_id || !selected_name) {
+        alert("部屋を選択してください。");
+        return;
+      }
+
+      if (selected_borrowed) {
+        // 返却確認モーダルを表示
+        returnConfirmName.textContent = selected_name;
+        returnOverlay.classList.remove("hidden");
       } else {
-        alert("借りる鍵を選択してください。");
+        // 貸出処理
+        (async () => {
+          await fetch("/borrow/select_row", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              key_id:    selected_id,
+              clab_name: selected_name
+            })
+          });
+          window.location.href = "/borrow/input";
+        })();
       }
     });
   </script>

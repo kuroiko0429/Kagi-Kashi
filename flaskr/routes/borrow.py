@@ -5,18 +5,36 @@ from ..db import get_db
 
 borrow_bp = Blueprint("borrow", __name__, url_prefix="/borrow")
 
+# clubs.status(locked/active/temp_locked) と一覧の状態表示(available/borrowed/locked)の対応
+STATUS_TO_STATE = {
+    "locked": "available",
+    "active": "borrowed",
+    "temp_locked": "locked",
+}
+
 # メインページ
 @borrow_bp.route('/')
 def main():
-    cur = get_db().cursor()
-    cur.execute('SELECT * FROM clubs')
+    conn = get_db()
+    rows = conn.execute("""
+        SELECT clubs.id, clubs.name, clubs.status, clubs.message, keys.key_number
+        FROM clubs
+        LEFT JOIN keys ON keys.club_id = clubs.id
+        GROUP BY clubs.id
+    """).fetchall()
+    active_club_ids = {
+        row["club_id"] for row in
+        conn.execute("SELECT club_id FROM borrow_records WHERE returned_at IS NULL")
+    }
     keys = []
-    for row in cur.fetchall():
+    for row in rows:
         keys.append({
             "id": row["id"],
             "name": row["name"],
-            "state": row["status"]!='locked',
-            "comment": row["message"]
+            "key_number": row["key_number"],
+            "state": STATUS_TO_STATE.get(row["status"], "available"),
+            "comment": row["message"],
+            "borrowed": row["id"] in active_club_ids
         })
     return render_template('borrow/index.html', keys=keys)
 
@@ -56,16 +74,56 @@ def send_borrow_data():
     if len(id) == 7:
         print(text)
         conn = get_db()
+        club_id = session["key_id"]
+        key_row = conn.execute(
+            "SELECT key_number FROM keys WHERE club_id = ?",
+            (club_id,)
+        ).fetchone()
+
         conn.execute(
             "INSERT INTO borrow_records (club_id, student_id, student_name, key_number, borrowed_at) VALUES (?, ?, ?, ?, datetime('now', 'localtime'))",
-            (2, id, id, session["key_id"])
+            (club_id, id, id, key_row["key_number"])
         )
         conn.execute("""
                 UPDATE keys
                 SET available = ?
-                WHERE id = ?
-            """, (1, session["key_id"]))
+                WHERE club_id = ? AND key_number = ?
+            """, (0, club_id, key_row["key_number"]))
+        conn.execute(
+            "UPDATE clubs SET status = 'active' WHERE id = ?",
+            (club_id,)
+        )
         conn.commit()
         return redirect(url_for('borrow.main'))
     else:
-        pass
+        return "不正な学籍番号です"
+
+# 貸出中のサークルを選んで返却
+@borrow_bp.route("/return_row", methods=["POST"])
+def return_row():
+    data = request.get_json()
+    club_id = data["club_id"]
+    conn = get_db()
+
+    active_borrow = conn.execute(
+        "SELECT * FROM borrow_records WHERE club_id = ? AND returned_at IS NULL",
+        (club_id,)
+    ).fetchone()
+
+    if not active_borrow:
+        return {"status": "error", "message": "貸出中の記録が見つかりません"}, 404
+
+    conn.execute(
+        "UPDATE borrow_records SET returned_at = datetime('now', 'localtime') WHERE id = ?",
+        (active_borrow["id"],)
+    )
+    conn.execute(
+        "UPDATE clubs SET status = 'locked' WHERE id = ?",
+        (club_id,)
+    )
+    conn.execute(
+        "UPDATE keys SET available = 1 WHERE club_id = ? AND key_number = ?",
+        (club_id, active_borrow["key_number"])
+    )
+    conn.commit()
+    return {"status": "ok"}
