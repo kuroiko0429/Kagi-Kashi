@@ -185,13 +185,16 @@ def update_key(key_id):
         WHERE id = ?
     """, (available, key_id))
 
-    status = available if 'active' else 'locked'
+    club_id = db.execute(
+        "SELECT club_id FROM keys WHERE id = ?", (key_id,)
+    ).fetchone()["club_id"]
+    status = 'active' if available == 0 else 'locked'
     db.execute("""
         UPDATE clubs
-        SET status = ?, 
-        message = '' 
+        SET status = ?,
+        message = ''
         WHERE id = ?
-    """, (status, key_id))
+    """, (status, club_id))
 
     db.commit()
     return jsonify({"message": "key updated"})
