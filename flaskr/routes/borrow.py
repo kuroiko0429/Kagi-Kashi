@@ -80,10 +80,17 @@ def send_borrow_data():
             "SELECT key_number FROM keys WHERE id = ?",
             (session["id"],)
         ).fetchone()["key_number"]
+        # 学籍番号から学生の名前を取得する
+        student_name = conn.execute(
+            "SELECT name FROM members WHERE student_id = ?",
+            (id,)
+        ).fetchone()
+        # 鍵を借りる
         conn.execute(
             "INSERT INTO borrow_records (club_id, student_id, student_name, key_number, borrowed_at) VALUES (?, ?, ?, ?, datetime('now', 'localtime'))",
-            (session["id"], id, id, key_number)
+            (session["id"], id, student_name["name"], key_number)
         )
+        # 鍵の状態を更新する
         conn.execute(
             "UPDATE clubs SET status = 'active', message = '' WHERE id = ?",
             (session["id"],)
