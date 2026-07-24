@@ -523,7 +523,7 @@
   function toggleFavDetail(btn, clubId) {
     const icon = btn.querySelector('[data-lucide="star"]') || btn.querySelector('svg') || btn.querySelector('i');
     
-    fetch(`/mobile/club/${clubId}/favorite`, {
+    fetch(`/club/${clubId}/favorite`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -562,7 +562,7 @@
 
     if (!studentId || !name) return;
 
-    fetch(`/mobile/club/${clubId}/add_member`, {
+    fetch(`/club/${clubId}/add_member`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -586,7 +586,7 @@
   }
 
   function changeMemberRole(clubId, studentId, newRole) {
-    fetch(`/mobile/club/${clubId}/change_role`, {
+    fetch(`/club/${clubId}/change_role`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -615,7 +615,7 @@
       return;
     }
     const clubId = "{{ club.id }}";
-    fetch(`/mobile/club/${clubId}/remove_member`, {
+    fetch(`/club/${clubId}/remove_member`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -651,7 +651,7 @@
       message = input.trim();
     }
 
-    fetch(`/mobile/club/${clubId}/quick_status`, {
+    fetch(`/club/${clubId}/quick_status`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',

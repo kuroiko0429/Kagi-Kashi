@@ -221,7 +221,7 @@
   }
 
   function changeMemberRole(clubId, studentId, newRole) {
-    fetch(`/mobile/club/${clubId}/change_role`, {
+    fetch(`/club/${clubId}/change_role`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: `student_id=${encodeURIComponent(studentId)}&role=${encodeURIComponent(newRole)}`
@@ -241,7 +241,7 @@
   function removeClubMember(studentId) {
     if (!confirm('本当にこのメンバーのサークル登録を解除しますか？')) return;
     const clubId = "{{ club.id }}";
-    fetch(`/mobile/club/${clubId}/remove_member`, {
+    fetch(`/club/${clubId}/remove_member`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: `student_id=${encodeURIComponent(studentId)}`
@@ -265,7 +265,7 @@
     const name = document.getElementById('new_mem_name').value.trim();
     if (!studentId || !name) return;
 
-    fetch(`/mobile/club/${clubId}/add_member`, {
+    fetch(`/club/${clubId}/add_member`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: `student_id=${encodeURIComponent(studentId)}&name=${encodeURIComponent(name)}`
