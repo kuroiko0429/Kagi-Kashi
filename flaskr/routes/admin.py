@@ -218,21 +218,35 @@ def add_club():
     db = get_db()
     data = request.get_json()
 
-    db.execute("""
-        INSERT INTO clubs (name, room_number, leader_student_id, status, message, icon_color, category)
+    cursor = db.execute("""
+        INSERT INTO clubs
+        (name, room_number, leader_student_id, status, message, icon_color, category)
         VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (
+    """,(
         data["name"],
         data["room_number"],
-        data.get("leader_student_id"),
+        data["leader_student_id"],
         "locked",
-        data.get("message", ""),
-        "#04F7B2",
+        "",
+        "#3B82F6",
         data["category"]
     ))
 
+    club_id = cursor.lastrowid
+
+    db.execute("""
+        INSERT INTO members
+        (student_id, name, club_id)
+        VALUES (?, ?, ?)
+    """,(
+        data["leader_student_id"],
+        data["leader_name"],
+        club_id
+    ))
+
     db.commit()
-    return jsonify({"message": "club added"})
+
+    return jsonify({"message":"club added"})
 
 # 部長変更
 @admin_bp.route("/api/admin/clubs/<int:club_id>/leader", methods=["PATCH"])
