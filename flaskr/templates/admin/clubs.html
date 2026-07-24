@@ -35,6 +35,10 @@
                 placeholder="部長ID"
                 class="border border-black rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
 
+            <input id="add-leader-name"
+                placeholder="部長名"
+                class="border border-black rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+
             <select id="add-category"
                     class="border border-black rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="sports">体育系</option>
@@ -174,11 +178,11 @@
     <script>
 
         async function addClub() {
-
             const data = {
                 name: document.getElementById("add-name").value,
                 room_number: document.getElementById("add-room").value,
                 leader_student_id: document.getElementById("add-leader").value,
+                leader_name: document.getElementById("add-leader-name").value,
                 category: document.getElementById("add-category").value
             };
 

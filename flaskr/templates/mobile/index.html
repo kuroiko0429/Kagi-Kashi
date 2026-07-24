@@ -528,7 +528,7 @@
   function toggleFav(btn, clubId) {
     const icon = btn.querySelector('[data-lucide="star"]') || btn.querySelector('svg') || btn.querySelector('i');
     
-    fetch(`/mobile/club/${clubId}/favorite`, {
+    fetch(`/club/${clubId}/favorite`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -594,7 +594,7 @@
       message = input.trim();
     }
 
-    fetch(`/mobile/club/${clubId}/quick_status`, {
+    fetch(`/club/${clubId}/quick_status`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',

@@ -185,13 +185,16 @@ def update_key(key_id):
         WHERE id = ?
     """, (available, key_id))
 
-    status = available if 'active' else 'locked'
+    club_id = db.execute(
+        "SELECT club_id FROM keys WHERE id = ?", (key_id,)
+    ).fetchone()["club_id"]
+    status = 'active' if available == 0 else 'locked'
     db.execute("""
         UPDATE clubs
-        SET status = ?, 
-        message = '' 
+        SET status = ?,
+        message = ''
         WHERE id = ?
-    """, (status, key_id))
+    """, (status, club_id))
 
     db.commit()
     return jsonify({"message": "key updated"})
@@ -215,21 +218,35 @@ def add_club():
     db = get_db()
     data = request.get_json()
 
-    db.execute("""
-        INSERT INTO clubs (name, room_number, leader_student_id, status, message, icon_color, category)
+    cursor = db.execute("""
+        INSERT INTO clubs
+        (name, room_number, leader_student_id, status, message, icon_color, category)
         VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (
+    """,(
         data["name"],
         data["room_number"],
-        data.get("leader_student_id"),
+        data["leader_student_id"],
         "locked",
-        data.get("message", ""),
-        "#04F7B2",
+        "",
+        "#3B82F6",
         data["category"]
     ))
 
+    club_id = cursor.lastrowid
+
+    db.execute("""
+        INSERT INTO members
+        (student_id, name, club_id)
+        VALUES (?, ?, ?)
+    """,(
+        data["leader_student_id"],
+        data["leader_name"],
+        club_id
+    ))
+
     db.commit()
-    return jsonify({"message": "club added"})
+
+    return jsonify({"message":"club added"})
 
 # 部長変更
 @admin_bp.route("/api/admin/clubs/<int:club_id>/leader", methods=["PATCH"])
