@@ -10,6 +10,8 @@ def normalize_student_id(student_id):
     student_id = student_id.strip()
     if student_id[:1].lower() == "s":
         student_id = student_id[1:]
+    if student_id[:1].lower() == "a" and student_id[-1:].lower() == "a":
+        student_id = student_id[1:-1]
     return student_id
 
 # clubs.status(locked/active/temp_locked) と一覧の状態表示(available/borrowed/locked)の対応
@@ -91,7 +93,7 @@ def send_borrow_data():
         conn = get_db()
         key_number = conn.execute(
             "SELECT key_number FROM keys WHERE id = ?",
-            (session["id"],)
+            (club_id,)
         ).fetchone()["key_number"]
         # 学籍番号から学生の名前を取得する
         student_name = conn.execute(
@@ -101,18 +103,18 @@ def send_borrow_data():
         # 鍵を借りる
         conn.execute(
             "INSERT INTO borrow_records (club_id, student_id, student_name, key_number, borrowed_at) VALUES (?, ?, ?, ?, datetime('now', 'localtime'))",
-            (session["id"], id, student_name["name"], key_number)
+            (club_id, id, student_name["name"], key_number)
         )
         # 鍵の状態を更新する
         conn.execute(
             "UPDATE clubs SET status = 'active', message = '' WHERE id = ?",
-            (session["id"],)
+            (club_id,)
         )
         conn.execute("""
                 UPDATE keys
                 SET available = ?
                 WHERE club_id = ? AND key_number = ?
-            """, (0, session["id"], key_number))
+            """, (0, club_id, key_number))
         conn.commit()
         return render_template('borrow/result.html', message="借りる処理が完了しました。")
     else:
