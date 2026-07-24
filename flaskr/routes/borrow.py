@@ -1,4 +1,4 @@
-from flask import Blueprint, request, render_template, session, redirect, url_for
+from flask import Blueprint, request, render_template, session
 import random
 import datetime
 from ..db import get_db
@@ -42,7 +42,7 @@ def main():
 @borrow_bp.route("/select_row", methods=["POST"])
 def select_row():
     data = request.get_json()
-    session["key_id"] = data["key_id"]
+    session["id"] = data["key_id"]
     session["clab_name"] = data["clab_name"]
     print(f"id: {data["key_id"]}, name: {data["clab_name"]}")
     return {"status": "ok"}
@@ -62,19 +62,28 @@ def send_borrow_data():
     if id[0] == "s":
         id = id[1:]
 
+    club_id = session["id"]
+
     text = str(
         f"id: {random.randint(-2147483648, 2147483647)}\n"
         f"clab_name: {session["clab_name"]}\n"
         f"student_id: {id}\n"
-        f"key_id: {session["key_id"]}\n"
+        f"key_id: {club_id}\n"
         f"borrowed_at: {datetime.datetime.now()}\n"
         f"returned_at: {1}"
     )
-    
+
+    # 部活のメンバーでなければ借りられないようにする
+    club_members = get_db().execute(
+        "SELECT student_id FROM members WHERE club_id = ?",
+        (club_id,)
+    ).fetchall()
+    if not any(member["student_id"] == id for member in club_members):
+        return render_template('borrow/result.html', message="この部活のメンバーではありません。")
+
     if len(id) == 7:
         print(text)
         conn = get_db()
-        club_id = session["key_id"]
         key_row = conn.execute(
             "SELECT key_number FROM keys WHERE club_id = ?",
             (club_id,)
@@ -90,13 +99,13 @@ def send_borrow_data():
                 WHERE club_id = ? AND key_number = ?
             """, (0, club_id, key_row["key_number"]))
         conn.execute(
-            "UPDATE clubs SET status = 'active' WHERE id = ?",
+            "UPDATE clubs SET status = 'active', message = '' WHERE id = ?",
             (club_id,)
         )
         conn.commit()
-        return redirect(url_for('borrow.main'))
+        return render_template('borrow/result.html', message="借りる処理が完了しました。")
     else:
-        return "不正な学籍番号です"
+        return render_template('borrow/result.html', message="不正な学籍番号です。")
 
 # 貸出中のサークルを選んで返却
 @borrow_bp.route("/return_row", methods=["POST"])
@@ -118,7 +127,7 @@ def return_row():
         (active_borrow["id"],)
     )
     conn.execute(
-        "UPDATE clubs SET status = 'locked' WHERE id = ?",
+        "UPDATE clubs SET status = 'locked', message = '' WHERE id = ?",
         (club_id,)
     )
     conn.execute(
