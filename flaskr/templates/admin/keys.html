@@ -73,17 +73,18 @@
             <td>
             
             {% if key.available == 1 %}
-            
-            <button onclick="updateKey({{ key.id }},0)" class="inline-block px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
-            貸出
-            </button>
-            
+
+            <span class="text-green-600 font-semibold">
+            貸出可能
+            </span>
+
             {% else %}
-            
-            <button onclick="updateKey({{ key.id }},1)" class="inline-block px-4 py-1.5 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700">
+
+            <button onclick="updateKey({{key.id}},1)"
+            class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">
             返却
             </button>
-            
+
             {% endif %}
             
             </td>
@@ -126,7 +127,11 @@ async function addKey(){
 }
 
 
-async function updateKey(id,status){
+async function updateKey(id){
+
+    if(!confirm("返却処理を行いますか？")){
+        return;
+    }
 
     await fetch(`/api/admin/keys/${id}`,{
         method:"PATCH",
@@ -134,10 +139,9 @@ async function updateKey(id,status){
             "Content-Type":"application/json"
         },
         body:JSON.stringify({
-            available:status
+            available:1
         })
     });
-
 
     location.reload();
 

@@ -79,21 +79,33 @@ def init_db():
     # 退部ロック検証用に登録日時をシード値として設定（佐藤太陽は60日前[解除可]、鈴木美咲は5日前[ロック中]）
     # 各サークルの1人目を部長(president)、2人目を一般部員(member)としてシード
     members_data = [
-        # ボードゲームサークル (ID: 1)
-        ("2023001", "佐藤 太陽", 1, "president", "datetime('now', '-60 days', 'localtime')"),
-        ("2023002", "鈴木 美咲", 1, "member", "datetime('now', '-5 days', 'localtime')"),
-        # コンピュータ研究会 (ID: 2)
-        ("2023003", "高橋 蓮", 2, "president", "datetime('now', '-45 days', 'localtime')"),
-        ("2023004", "田中 葵", 2, "member", "datetime('now', '-10 days', 'localtime')"),
-        # 写真部 (ID: 3)
-        ("2023005", "渡辺 陸", 3, "president", "datetime('now', '-40 days', 'localtime')"),
-        ("2023006", "伊藤 結衣", 3, "member", "datetime('now', '-12 days', 'localtime')"),
-        # 軽音楽部 (ID: 4)
-        ("2023007", "中村 陽翔", 4, "president", "datetime('now', '-50 days', 'localtime')"),
-        ("2023008", "小林 凛", 4, "member", "datetime('now', '-2 days', 'localtime')"),
-        # アニメーション研究会 (ID: 5)
-        ("2023009", "加藤 颯太", 5, "president", "datetime('now', '-35 days', 'localtime')"),
-        ("2023010", "吉田 杏", 5, "member", "datetime('now', '-8 days', 'localtime')"),
+        # 既存サークル
+        ("2023101", "山田 太郎", 1, "president", "datetime('now', '-60 days', 'localtime')"),
+        ("2023102", "佐藤 一郎", 2, "president", "datetime('now', '-55 days', 'localtime')"),
+        ("2023103", "鈴木 花子", 3, "president", "datetime('now', '-50 days', 'localtime')"),
+        ("2023104", "高橋 健太", 4, "president", "datetime('now', '-45 days', 'localtime')"),
+        ("2023105", "田中 美咲", 5, "president", "datetime('now', '-40 days', 'localtime')"),
+
+        # 体育系
+        ("2023201", "伊藤 翔太", 6, "president", "datetime('now', '-35 days', 'localtime')"),
+        ("2023202", "渡辺 直樹", 7, "president", "datetime('now', '-30 days', 'localtime')"),
+        ("2023203", "小林 彩", 8, "president", "datetime('now', '-25 days', 'localtime')"),
+        ("2023204", "加藤 大輔", 9, "president", "datetime('now', '-20 days', 'localtime')"),
+        ("2023205", "吉田 里奈", 10, "president", "datetime('now', '-15 days', 'localtime')"),
+
+        # 文化系
+        ("2023301", "山本 拓也", 11, "president", "datetime('now', '-40 days', 'localtime')"),
+        ("2023302", "中村 優", 12, "president", "datetime('now', '-35 days', 'localtime')"),
+        ("2023303", "小川 翔", 13, "president", "datetime('now', '-30 days', 'localtime')"),
+        ("2023304", "松本 陽子", 14, "president", "datetime('now', '-25 days', 'localtime')"),
+        ("2023305", "井上 陸", 15, "president", "datetime('now', '-20 days', 'localtime')"),
+
+        # 同好会
+        ("2023401", "木村 拓海", 16, "president", "datetime('now', '-35 days', 'localtime')"),
+        ("2023402", "林 美穂", 17, "president", "datetime('now', '-30 days', 'localtime')"),
+        ("2023403", "森 翔太", 18, "president", "datetime('now', '-25 days', 'localtime')"),
+        ("2023404", "清水 健", 19, "president", "datetime('now', '-20 days', 'localtime')"),
+        ("2023405", "阿部 七海", 20, "president", "datetime('now', '-15 days', 'localtime')"),
     ]
     for student_id, name, club_id, role, reg_expr in members_data:
         db.execute(

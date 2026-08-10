@@ -177,27 +177,42 @@ def update_key(key_id):
     db = get_db()
     data = request.get_json()
 
-    available = data["available"]  # 1 or 0
+    available = data["available"]
 
+    # 鍵状態更新
     db.execute("""
         UPDATE keys
         SET available = ?
         WHERE id = ?
     """, (available, key_id))
 
-    club_id = db.execute(
-        "SELECT club_id FROM keys WHERE id = ?", (key_id,)
-    ).fetchone()["club_id"]
-    status = 'active' if available == 0 else 'locked'
-    db.execute("""
-        UPDATE clubs
-        SET status = ?,
-        message = ''
-        WHERE id = ?
-    """, (status, club_id))
+
+    # 返却処理の場合
+    if available == 1:
+
+        key = db.execute("""
+            SELECT club_id, key_number
+            FROM keys
+            WHERE id = ?
+        """, (key_id,)).fetchone()
+
+
+        if key:
+            db.execute("""
+                UPDATE borrow_records
+                SET returned_at = datetime('now','localtime')
+                WHERE club_id = ?
+                AND key_number = ?
+                AND returned_at IS NULL
+            """, (
+                key["club_id"],
+                key["key_number"]
+            ))
+
 
     db.commit()
-    return jsonify({"message": "key updated"})
+
+    return jsonify({"message":"key updated"})
 
 # サークル一覧（管理者用）
 @admin_bp.route("/api/admin/clubs", methods=["GET"])
