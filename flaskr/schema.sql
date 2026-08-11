@@ -1,3 +1,6 @@
+DROP TABLE IF EXISTS common_key_borrow_records;
+DROP TABLE IF EXISTS common_keys;
+
 DROP TABLE IF EXISTS keys;
 DROP TABLE IF EXISTS clubs;
 DROP TABLE IF EXISTS members;
@@ -146,4 +149,36 @@ DEFAULT CURRENT_TIMESTAMP,
 
 FOREIGN KEY (club_id)
 REFERENCES clubs(id)
+);
+
+CREATE TABLE common_keys (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    key_number TEXT UNIQUE NOT NULL,
+
+    name TEXT NOT NULL,
+
+    available INTEGER NOT NULL
+    DEFAULT 1
+);
+
+CREATE TABLE common_key_borrow_records (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    common_key_id INTEGER NOT NULL,
+
+    club_id INTEGER NOT NULL,
+
+    student_id TEXT NOT NULL,
+
+    borrowed_at TIMESTAMP
+    DEFAULT CURRENT_TIMESTAMP,
+
+    returned_at TIMESTAMP,
+
+    FOREIGN KEY (common_key_id)
+    REFERENCES common_keys(id),
+
+    FOREIGN KEY (club_id)
+    REFERENCES clubs(id)
 );

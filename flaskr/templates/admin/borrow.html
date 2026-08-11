@@ -1,71 +1,188 @@
 <!DOCTYPE html>
+
 <html lang="ja">
 
 <head>
-    <meta charset="UTF-8">
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <title>貸出履歴管理</title>
+
+<meta charset="UTF-8">
+
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+<title>貸出履歴管理</title>
+
 </head>
 
 <body class="px-12">
 
-    <a href="/admin" class="py-3 block">
+<a href="/admin" class="py-3 block">
     ← 管理者メニューへ戻る
-    </a>
+</a>
 
-    <header class="flex justify-between items-center mb-8">
-        <h1 class="text-4xl font-bold text-gray-800">貸出履歴管理</h1>
-    </header>
-    
+
+<header class="flex justify-between items-center mb-8">
+
+    <h1 class="text-4xl font-bold text-gray-800">
+        貸出履歴管理
+    </h1>
+
+</header>
+
+
 <hr>
 
-<h2 class="text-3xl my-4">貸出一覧</h2>
-<div class="border border-gray-300 rounded-xl">
+
+<h2 class="text-3xl my-4">
+    貸出一覧
+</h2>
+
+
+<div class="border border-gray-300 rounded-xl overflow-x-auto">
+
     <table class="w-full text-left border-collapse">
+
         <thead class="sticky top-0 bg-gray-100">
+
             <tr>
-                <th class="px-4 py-3 border-b border-gray-300">ID</th>
-                <th class="px-4 py-3 border-b border-gray-300">サークル</th>
-                <th class="px-4 py-3 border-b border-gray-300">学生ID</th>
-                <th class="px-4 py-3 border-b border-gray-300">名前</th>
-                <th class="px-4 py-3 border-b border-gray-300">鍵番号</th>
-                <th class="px-4 py-3 border-b border-gray-300">貸出日時</th>
-                <th class="px-4 py-3 border-b border-gray-300">返却日時</th>
-                <th class="px-4 py-3 border-b border-gray-300">状態</th>
+
+                <th class="px-4 py-3 border-b border-gray-300">
+                    ID
+                </th>
+
+                <th class="px-4 py-3 border-b border-gray-300">
+                    鍵種類
+                </th>
+
+                <th class="px-4 py-3 border-b border-gray-300">
+                    サークル
+                </th>
+
+                <th class="px-4 py-3 border-b border-gray-300">
+                    学生ID
+                </th>
+
+                <th class="px-4 py-3 border-b border-gray-300">
+                    名前
+                </th>
+
+                <th class="px-4 py-3 border-b border-gray-300">
+                    鍵番号
+                </th>
+
+                <th class="px-4 py-3 border-b border-gray-300">
+                    貸出日時
+                </th>
+
+                <th class="px-4 py-3 border-b border-gray-300">
+                    返却日時
+                </th>
+
+                <th class="px-4 py-3 border-b border-gray-300">
+                    状態
+                </th>
+
             </tr>
+
         </thead>
 
+
         <tbody>
+
         {% for record in records %}
-        <tr class="hover:bg-gray-50">
 
-            <td class="px-4 py-3 border-b border-gray-200">{{ record.id }}</td>
-            <td class="px-4 py-3 border-b border-gray-200">{{ record.club_name }}</td>
-            <td class="px-4 py-3 border-b border-gray-200">{{ record.student_id }}</td>
-            <td class="px-4 py-3 border-b border-gray-200">{{ record.student_name }}</td>
-            <td class="px-4 py-3 border-b border-gray-200">{{ record.key_number }}</td>
-            <td class="px-4 py-3 border-b border-gray-200">{{ record.borrowed_at }}</td>
+            <tr class="hover:bg-gray-50">
 
-            <td class="px-4 py-3 border-b border-gray-200">
-                {% if record.returned_at %}
-                    {{ record.returned_at }}
-                {% else %}
-                    -
-                {% endif %}
-            </td>
 
-            <td class="px-4 py-3 border-b border-gray-200">
-                {% if record.returned_at %}
-                    <span class="text-green-600 font-semibold">完了</span>
-                {% else %}
-                    <span class="text-orange-600 font-semibold">貸出中</span>
-                {% endif %}
-            </td>
+                <td class="px-4 py-3 border-b border-gray-200">
+                    {{ record.id }}
+                </td>
 
-        </tr>
+
+                <td class="px-4 py-3 border-b border-gray-200">
+
+                    {% if record.key_type == "共用鍵" %}
+
+                        <span class="text-purple-600 font-semibold">
+                            共用鍵
+                        </span>
+
+                    {% else %}
+
+                        <span class="text-blue-600 font-semibold">
+                            サークル鍵
+                        </span>
+
+                    {% endif %}
+
+                </td>
+
+
+                <td class="px-4 py-3 border-b border-gray-200">
+                    {{ record.club_name }}
+                </td>
+
+
+                <td class="px-4 py-3 border-b border-gray-200">
+                    {{ record.student_id }}
+                </td>
+
+
+                <td class="px-4 py-3 border-b border-gray-200">
+                    {{ record.student_name or "-" }}
+                </td>
+
+
+                <td class="px-4 py-3 border-b border-gray-200">
+                    {{ record.key_number }}
+                </td>
+
+
+                <td class="px-4 py-3 border-b border-gray-200">
+                    {{ record.borrowed_at }}
+                </td>
+
+
+                <td class="px-4 py-3 border-b border-gray-200">
+
+                    {% if record.returned_at %}
+
+                        {{ record.returned_at }}
+
+                    {% else %}
+
+                        -
+
+                    {% endif %}
+
+                </td>
+
+
+                <td class="px-4 py-3 border-b border-gray-200">
+
+                    {% if record.returned_at %}
+
+                        <span class="text-green-600 font-semibold">
+                            完了
+                        </span>
+
+                    {% else %}
+
+                        <span class="text-orange-600 font-semibold">
+                            貸出中
+                        </span>
+
+                    {% endif %}
+
+                </td>
+
+
+            </tr>
+
         {% endfor %}
+
         </tbody>
+
     </table>
+
 </div>
 
 </body>

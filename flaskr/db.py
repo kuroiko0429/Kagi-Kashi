@@ -48,7 +48,7 @@ def init_db():
         ("総合創作サークル(SSS)", "105", "2023105", "locked", "", "#f97316", "cultural"),
 
         # 体育系
-        ("バスケットボール部", "111", "2023201", "active", "", "#f97316", "sports"),
+        ("バスケットボール部", "111", "2023201", "locked", "", "#f97316", "sports"),
         ("硬式野球部", "112", "2023202", "locked", "", "#3b82f6", "sports"),
         ("バドミントン部", "113", "2023203", "locked", "", "#10b981", "sports"),
         ("卓球部", "114", "2023204", "locked", "", "#ef4444", "sports"),
@@ -167,6 +167,23 @@ def init_db():
         db.execute(
             "INSERT INTO keys (club_id, key_number, available) VALUES (?, ?, ?)",
             (club_id, key_number, available)
+        )
+
+    # 7. 共用鍵のデータ
+    common_keys_data = [
+    ("C-001", "体育館", 1),
+    ("C-002", "グラウンド", 1),
+    ("C-003", "多目的室", 1),
+    ]
+
+    for key_number, name, available in common_keys_data:
+        db.execute(
+            """
+            INSERT INTO common_keys
+            (key_number, name, available)
+            VALUES (?, ?, ?)
+            """,
+            (key_number, name, available)
         )
 
     db.commit()

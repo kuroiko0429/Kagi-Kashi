@@ -1,5 +1,7 @@
 <!DOCTYPE html>
+
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -7,145 +9,576 @@
 </head>
 
 <body class="px-12">
-    <a href="/admin" class="py-3 block">← 管理者メニューへ戻る</a>
 
-    <header class="flex justify-between items-center mb-8">
-        <h1 class="text-4xl font-bold">鍵管理</h1>
-    </header>
+```
+<a href="/admin" class="py-3 block">
+    ← 管理者メニューへ戻る
+</a>
+
+<header class="flex justify-between items-center mb-8">
+    <h1 class="text-4xl font-bold">
+        鍵管理
+    </h1>
+</header>
 
 <hr>
 
-<h2 class="text-3xl my-4">鍵追加</h2>
-<select id="club_id" class="border border-black rounded-md px-3 py-2 mb-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
-{% for club in clubs %}
-<option value="{{ club.id }}">
-{{ club.name }}
-</option>
-{% endfor %}
+<!-- ============================== -->
+<!-- サークル鍵追加 -->
+<!-- ============================== -->
+
+<h2 class="text-3xl my-4">
+    サークル鍵追加
+</h2>
+
+<select
+    id="club_id"
+    class="border border-black rounded-md px-3 py-2 mb-2 bg-white text-gray-900"
+>
+
+    {% for club in clubs %}
+
+    <option value="{{ club.id }}">
+        {{ club.name }}
+    </option>
+
+    {% endfor %}
+
 </select>
 
-<input id="key_number" placeholder="鍵番号" class="border border-black rounded-md px-3 py-2 mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+<input
+    id="key_number"
+    placeholder="鍵番号"
+    class="border border-black rounded-md px-3 py-2 mb-2"
+>
 
-<button onclick="addKey()" class="inline-block px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">追加</button>
+<button
+    onclick="addKey()"
+    class="inline-block px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
+>
+    追加
+</button>
 
-<hr>
 
-<h2 class="text-3xl my-4">鍵一覧</h2>
+<!-- ============================== -->
+<!-- 共用鍵追加 -->
+<!-- ============================== -->
+
+<h2 class="text-3xl my-6">
+    共用鍵追加
+</h2>
+
+<input
+    id="common_key_number"
+    placeholder="鍵番号"
+    class="border border-black rounded-md px-3 py-2 mb-2"
+>
+
+<input
+    id="common_key_name"
+    placeholder="鍵の名前"
+    class="border border-black rounded-md px-3 py-2 mb-2"
+>
+
+<button
+    onclick="addCommonKey()"
+    class="inline-block px-4 py-1.5 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700"
+>
+    共用鍵を追加
+</button>
+
+
+<hr class="my-8">
+
+
+<!-- ============================== -->
+<!-- サークル鍵一覧 -->
+<!-- ============================== -->
+
+<h2 class="text-3xl my-4">
+    サークル鍵一覧
+</h2>
+
 <div class="max-h-60 overflow-y-auto border border-gray-300 rounded-xl">
+
     <table class="w-full text-left border-collapse">
+
         <thead class="sticky top-0 bg-gray-100">
+
             <tr>
-                <th class="px-4 py-3 border-b border-gray-300">ID</th>
-                <th class="px-4 py-3 border-b border-gray-300">鍵番号</th>
-                <th class="px-4 py-3 border-b border-gray-300">サークル</th>
-                <th class="px-4 py-3 border-b border-gray-300">状態</th>
-                <th class="px-4 py-3 border-b border-gray-300">操作</th>
+
+                <th class="px-4 py-3 border-b border-gray-300">
+                    ID
+                </th>
+
+                <th class="px-4 py-3 border-b border-gray-300">
+                    鍵番号
+                </th>
+
+                <th class="px-4 py-3 border-b border-gray-300">
+                    サークル
+                </th>
+
+                <th class="px-4 py-3 border-b border-gray-300">
+                    状態
+                </th>
+
+                <th class="px-4 py-3 border-b border-gray-300">
+                    操作
+                </th>
+
             </tr>
+
         </thead>
-        
+
         <tbody>
+
             {% for key in keys %}
-        
+
             <tr class="hover:bg-gray-50">
-            
-            <td class="px-4 py-3 border-b border-gray-200">
-            {{ key.id }}
-            </td>
-            
-            <td class="px-4 py-3 border-b border-gray-200">
-            {{ key.key_number }}
-            </td>
-            
-            <td class="px-4 py-3 border-b border-gray-200">
-            {{ key.club_name }}
-            </td>
-            
-            <td class="px-4 py-3 border-b border-gray-200">
-            
-            {% if key.available == 1 %}
-            利用可能
-            {% else %}
-            貸出中
-            {% endif %}
-            
-            </td>
-            
-            <td>
-            
-            {% if key.available == 1 %}
 
-            <span class="text-green-600 font-semibold">
-            貸出可能
-            </span>
+                <td class="px-4 py-3 border-b border-gray-200">
+                    {{ key.id }}
+                </td>
 
-            {% else %}
+                <td class="px-4 py-3 border-b border-gray-200">
+                    {{ key.key_number }}
+                </td>
 
-            <button onclick="updateKey({{key.id}},1)"
-            class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">
-            返却
-            </button>
+                <td class="px-4 py-3 border-b border-gray-200">
+                    {{ key.club_name }}
+                </td>
 
-            {% endif %}
-            
-            </td>
-            
+                <td class="px-4 py-3 border-b border-gray-200">
+
+                    {% if key.available == 1 %}
+
+                        利用可能
+
+                    {% else %}
+
+                        貸出中
+
+                    {% endif %}
+
+                </td>
+
+                <td class="px-4 py-3 border-b border-gray-200">
+
+                    {% if key.available == 1 %}
+
+                        <span class="text-green-600 font-semibold">
+                            貸出可能
+                        </span>
+
+                    {% else %}
+
+                        <button
+                            onclick="updateKey({{ key.id }})"
+                            class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                        >
+                            返却
+                        </button>
+
+                    {% endif %}
+
+                </td>
+
             </tr>
-        
+
             {% endfor %}
+
         </tbody>
-        
-        
-        </table>
+
+    </table>
+
 </div>
 
 
+<!-- ============================== -->
+<!-- 共用鍵一覧 -->
+<!-- ============================== -->
+
+<h2 class="text-3xl my-6">
+    共用鍵一覧
+</h2>
+
+<div class="max-h-60 overflow-y-auto border border-gray-300 rounded-xl">
+
+    <table class="w-full text-left border-collapse">
+
+        <thead class="sticky top-0 bg-gray-100">
+
+            <tr>
+
+                <th class="px-4 py-3 border-b border-gray-300">
+                    ID
+                </th>
+
+                <th class="px-4 py-3 border-b border-gray-300">
+                    鍵番号
+                </th>
+
+                <th class="px-4 py-3 border-b border-gray-300">
+                    名前
+                </th>
+
+                <th class="px-4 py-3 border-b border-gray-300">
+                    状態
+                </th>
+
+                <th class="px-4 py-3 border-b border-gray-300">
+                    操作
+                </th>
+
+            </tr>
+
+        </thead>
+
+        <tbody id="common-key-list">
+
+        </tbody>
+
+    </table>
+
+</div>
+```
 
 <script>
 
+
+// ==========================================
+// サークル鍵追加
+// ==========================================
+
 async function addKey(){
 
-    const data={
-        club_id:
-        document.getElementById("club_id").value,
+    const clubId =
+        document.getElementById("club_id").value;
 
-        key_number:
-        document.getElementById("key_number").value
+    const keyNumber =
+        document.getElementById("key_number").value.trim();
+
+
+    if(!keyNumber){
+
+        alert("鍵番号を入力してください。");
+
+        return;
+    }
+
+
+    const data = {
+
+        club_id: clubId,
+
+        key_number: keyNumber
+
     };
 
 
-    await fetch("/api/admin/keys",{
-        method:"POST",
-        headers:{
-            "Content-Type":"application/json"
-        },
-        body:JSON.stringify(data)
-    });
+    const response = await fetch(
+        "/api/admin/keys",
+        {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify(data)
+        }
+    );
+
+
+    if(!response.ok){
+
+        alert("鍵の追加に失敗しました。");
+
+        return;
+    }
 
 
     location.reload();
 
 }
 
+
+
+// ==========================================
+// 共用鍵追加
+// ==========================================
+
+async function addCommonKey(){
+
+    const keyNumber =
+        document
+        .getElementById("common_key_number")
+        .value
+        .trim();
+
+
+    const name =
+        document
+        .getElementById("common_key_name")
+        .value
+        .trim();
+
+
+    if(!keyNumber){
+
+        alert("鍵番号を入力してください。");
+
+        return;
+    }
+
+
+    if(!name){
+
+        alert("鍵の名前を入力してください。");
+
+        return;
+    }
+
+
+    const data = {
+
+        key_number: keyNumber,
+
+        name: name
+
+    };
+
+
+    const response = await fetch(
+        "/api/admin/common-keys",
+        {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify(data)
+        }
+    );
+
+
+    if(!response.ok){
+
+        alert("共用鍵の追加に失敗しました。");
+
+        return;
+    }
+
+
+    location.reload();
+
+}
+
+
+
+// ==========================================
+// サークル鍵返却
+// ==========================================
 
 async function updateKey(id){
 
     if(!confirm("返却処理を行いますか？")){
+
         return;
+
     }
 
-    await fetch(`/api/admin/keys/${id}`,{
-        method:"PATCH",
-        headers:{
-            "Content-Type":"application/json"
-        },
-        body:JSON.stringify({
-            available:1
-        })
-    });
+
+    const response = await fetch(
+        `/api/admin/keys/${id}`,
+        {
+            method: "PATCH",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                available: 1
+            })
+        }
+    );
+
+
+    if(!response.ok){
+
+        alert("返却処理に失敗しました。");
+
+        return;
+
+    }
+
 
     location.reload();
 
 }
+
+
+
+// ==========================================
+// 共用鍵一覧
+// ==========================================
+
+async function loadCommonKeys(){
+
+    const response = await fetch(
+        "/api/admin/common-keys"
+    );
+
+
+    if(!response.ok){
+
+        return;
+
+    }
+
+
+    const keys = await response.json();
+
+
+    const list =
+        document.getElementById(
+            "common-key-list"
+        );
+
+
+    list.innerHTML = "";
+
+
+    keys.forEach(key => {
+
+        const row =
+            document.createElement("tr");
+
+
+        row.className =
+            "hover:bg-gray-50";
+
+
+        let status = "";
+
+        let operation = "";
+
+
+        if(key.available == 1){
+
+            status = `
+                <span class="text-green-600 font-semibold">
+                    利用可能
+                </span>
+            `;
+
+            operation = `
+                <span class="text-green-600">
+                    貸出可能
+                </span>
+            `;
+
+        }
+        else{
+
+            status = `
+                <span class="text-orange-600 font-semibold">
+                    貸出中
+                </span>
+            `;
+
+            operation = `
+                <button
+                    onclick="updateCommonKey(${key.id})"
+                    class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                >
+                    返却
+                </button>
+            `;
+
+        }
+
+
+        row.innerHTML = `
+
+            <td class="px-4 py-3 border-b border-gray-200">
+                ${key.id}
+            </td>
+
+            <td class="px-4 py-3 border-b border-gray-200">
+                ${key.key_number}
+            </td>
+
+            <td class="px-4 py-3 border-b border-gray-200">
+                ${key.name}
+            </td>
+
+            <td class="px-4 py-3 border-b border-gray-200">
+                ${status}
+            </td>
+
+            <td class="px-4 py-3 border-b border-gray-200">
+                ${operation}
+            </td>
+
+        `;
+
+
+        list.appendChild(row);
+
+    });
+
+}
+
+
+
+// ==========================================
+// 共用鍵返却
+// ==========================================
+
+async function updateCommonKey(id){
+
+    if(!confirm("共用鍵の返却処理を行いますか？")){
+
+        return;
+
+    }
+
+
+    const response = await fetch(
+        `/api/admin/common-keys/${id}`,
+        {
+            method: "PATCH",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                available: 1
+            })
+        }
+    );
+
+
+    if(!response.ok){
+
+        alert("返却処理に失敗しました。");
+
+        return;
+
+    }
+
+
+    location.reload();
+
+}
+
+
+loadCommonKeys();
 
 </script>
 

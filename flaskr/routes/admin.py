@@ -92,7 +92,8 @@ def admin_keys():
 def admin_borrow():
     db = get_db()
 
-    records = db.execute("""
+    # サークル鍵の履歴
+    club_records = db.execute("""
         SELECT
             borrow_records.id,
             borrow_records.student_id,
@@ -100,12 +101,42 @@ def admin_borrow():
             borrow_records.key_number,
             borrow_records.borrowed_at,
             borrow_records.returned_at,
-            clubs.name AS club_name
+            clubs.name AS club_name,
+            'サークル鍵' AS key_type
         FROM borrow_records
         JOIN clubs
         ON borrow_records.club_id = clubs.id
-        ORDER BY borrow_records.borrowed_at DESC
     """).fetchall()
+
+    # 共用鍵の履歴
+    common_records = db.execute("""
+        SELECT
+            common_key_borrow_records.id,
+            common_key_borrow_records.student_id,
+            members.name AS student_name,
+            common_keys.key_number,
+            common_key_borrow_records.borrowed_at,
+            common_key_borrow_records.returned_at,
+            clubs.name AS club_name,
+            '共用鍵' AS key_type
+        FROM common_key_borrow_records
+        JOIN common_keys
+        ON common_key_borrow_records.common_key_id = common_keys.id
+        JOIN clubs
+        ON common_key_borrow_records.club_id = clubs.id
+        LEFT JOIN members
+        ON common_key_borrow_records.student_id = members.student_id
+        AND common_key_borrow_records.club_id = members.club_id
+    """).fetchall()
+
+    # 2種類の履歴を結合
+    records = list(club_records) + list(common_records)
+
+    # 貸出日時の新しい順に並べる
+    records.sort(
+        key=lambda record: record["borrowed_at"] or "",
+        reverse=True
+    )
 
     return render_template(
         "admin/borrow.html",
@@ -170,6 +201,186 @@ def add_key():
 
     db.commit()
     return jsonify({"message": "key added"})
+
+# 共用鍵一覧
+@admin_bp.route("/api/admin/common-keys", methods=["GET"])
+def get_common_keys():
+    db = get_db()
+
+    rows = db.execute("""
+        SELECT
+            id,
+            key_number,
+            name,
+            available
+        FROM common_keys
+        ORDER BY id
+    """).fetchall()
+
+    return jsonify([dict(row) for row in rows])
+
+
+# 共用鍵追加
+@admin_bp.route("/api/admin/common-keys", methods=["POST"])
+def add_common_key():
+    db = get_db()
+
+    data = request.get_json()
+
+    key_number = data["key_number"]
+    name = data["name"]
+
+    db.execute("""
+        INSERT INTO common_keys
+        (
+            key_number,
+            name,
+            available
+        )
+        VALUES (?, ?, 1)
+    """, (
+        key_number,
+        name
+    ))
+
+    db.commit()
+
+    return jsonify({
+        "message": "common key added"
+    })
+
+
+# 共用鍵返却
+# 共用鍵の状態更新（貸出・返却）
+
+@admin_bp.route(
+"/api/admin/common-keys/<int:key_id>",
+methods=["PATCH"]
+)
+def update_common_key(key_id):
+
+    db = get_db()
+    data = request.get_json()
+
+    available = data.get("available")
+
+    if available is None:
+        return jsonify({
+            "message": "availableが指定されていません"
+        }), 400
+
+    # 共用鍵を取得
+    common_key = db.execute("""
+        SELECT
+            id,
+            key_number,
+            name,
+            available
+        FROM common_keys
+        WHERE id = ?
+    """, (
+        key_id,
+    )).fetchone()
+
+    if common_key is None:
+        return jsonify({
+            "message": "共用鍵が見つかりません"
+        }), 404
+
+    # 共用鍵の状態を更新
+    db.execute("""
+        UPDATE common_keys
+        SET available = ?
+        WHERE id = ?
+    """, (
+        available,
+        key_id
+    ))
+
+    # 共用鍵を返却した場合
+    if available == 1:
+
+        # 現在貸出中の履歴を取得
+        common_borrow = db.execute("""
+            SELECT
+                id,
+                club_id
+            FROM common_key_borrow_records
+            WHERE common_key_id = ?
+            AND returned_at IS NULL
+            ORDER BY borrowed_at DESC
+            LIMIT 1
+        """, (
+            key_id,
+        )).fetchone()
+
+        # 貸出記録が存在する場合
+        if common_borrow:
+
+            club_id = common_borrow["club_id"]
+
+            # 共用鍵の貸出履歴を返却済みにする
+            db.execute("""
+                UPDATE common_key_borrow_records
+                SET returned_at = datetime('now', 'localtime')
+                WHERE id = ?
+            """, (
+                common_borrow["id"],
+            ))
+
+            # そのサークルの他の鍵がまだ貸出中か確認
+
+            # サークル鍵
+            club_borrow = db.execute("""
+                SELECT id
+                FROM borrow_records
+                WHERE club_id = ?
+                AND returned_at IS NULL
+            """, (
+                club_id,
+            )).fetchone()
+
+            # 共用鍵
+            another_common_borrow = db.execute("""
+                SELECT id
+                FROM common_key_borrow_records
+                WHERE club_id = ?
+                AND returned_at IS NULL
+            """, (
+                club_id,
+            )).fetchone()
+
+            # どちらか一方でも貸出中
+            if club_borrow or another_common_borrow:
+
+                db.execute("""
+                    UPDATE clubs
+                    SET status = 'active',
+                        message = ''
+                    WHERE id = ?
+                """, (
+                    club_id,
+                ))
+
+            # 両方とも返却済み
+            else:
+
+                db.execute("""
+                    UPDATE clubs
+                    SET status = 'locked',
+                        message = ''
+                    WHERE id = ?
+                """, (
+                    club_id,
+                ))
+
+    db.commit()
+
+    return jsonify({
+        "message": "common key updated"
+    })
+
+
 
 # 鍵の状態更新（貸出/返却）
 @admin_bp.route("/api/admin/keys/<int:key_id>", methods=["PATCH"])

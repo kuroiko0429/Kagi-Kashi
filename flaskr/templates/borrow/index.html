@@ -48,6 +48,7 @@
               <tr class="key-row h-12 hover:bg-gray-50 transition-colors text-sm"
                   data-name="{{ key.name }}"
                   data-id="{{ key.id }}"
+                  data-type="{{ key.type }}"
                   data-borrowed="{{ 'true' if key.borrowed else 'false' }}"
                   data-state="{{ key.state }}">
                 <td class="px-4 font-mono">{{ key.key_number or '-' }}</td>
@@ -110,7 +111,7 @@
   </style>
 
   <script>
-    let selected_id, selected_name, selected_borrowed;
+    let selected_id, selected_name, selected_borrowed, selected_type;
     let currentFilter = 'all';
 
     const borrowButton = document.querySelector("#borrow_button");
@@ -150,6 +151,7 @@
             row.classList.remove('selected');
             selected_id = null;
             selected_name = null;
+            selected_type = null;
             selected_borrowed = null;
             updateBorrowButton();
           }
@@ -186,6 +188,7 @@
         this.classList.add('selected');
         selected_id = this.dataset.id;
         selected_name = this.dataset.name;
+        selected_type = this.dataset.type;
         selected_borrowed = this.dataset.borrowed === "true";
         updateBorrowButton();
       });
@@ -207,7 +210,8 @@
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          club_id: selected_id
+          id: selected_id,
+          type: selected_type
         })
       });
       window.location.reload();
@@ -233,10 +237,16 @@
               "Content-Type": "application/json"
             },
             body: JSON.stringify({
-              club_id:    selected_id,
+              id: selected_id,
+              type: selected_type
             })
           });
-          window.location.href = "/borrow/input";
+
+          if (selected_type === "common") {
+            window.location.href = "/borrow/select_club";
+          } else {
+            window.location.href = "/borrow/input";
+          }
         })();
       }
     });
